@@ -14,8 +14,20 @@ import net.minecraft.world.World;
 
 public class EntityVoidMonster extends EntityMob {
 
-	public EntityVoidMonster(World par1World) {
-		super(par1World);
+	private boolean isNether;
+
+	public EntityVoidMonster(World world) {
+		super(world);
+		this.setLocationAndAngles(0, -32, 0, 0, 0);
+	}
+
+	public EntityVoidMonster setNether() {
+		isNether = true;
+		return this;
+	}
+
+	public boolean isNetherVoid() {
+		return isNether;
 	}
 
 	@Override

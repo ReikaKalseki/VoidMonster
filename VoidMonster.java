@@ -20,6 +20,7 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkMod;
+import cpw.mods.fml.common.registry.GameRegistry;
 
 @Mod( modid = "VoidMonster", name="Void Monster", version="beta", certificateFingerprint = "@GET_FINGERPRINT@")
 @NetworkMod(clientSideRequired = true, serverSideRequired = true/*,
@@ -37,7 +38,7 @@ public class VoidMonster extends DragonAPIMod {
 	@Override
 	@Init
 	public void load(FMLInitializationEvent event) {
-
+		GameRegistry.registerWorldGenerator(new MonsterGenerator());
 	}
 
 	@Override
