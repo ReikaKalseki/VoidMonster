@@ -9,9 +9,11 @@
  ******************************************************************************/
 package Reika.VoidMonster;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import Reika.DragonAPI.Base.DragonAPIMod;
+import Reika.DragonAPI.Exception.RegistrationException;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Init;
 import cpw.mods.fml.common.Mod.PostInit;
@@ -28,6 +30,9 @@ clientPacketHandlerSpec = @SidedPacketHandler(channels = { "VoidMonsterData" }, 
 serverPacketHandlerSpec = @SidedPacketHandler(channels = { "VoidMonsterData" }, packetHandler = ServerPackets.class)*/)
 
 public class VoidMonster extends DragonAPIMod {
+
+	//@Instance
+	public static VoidMonster instance = new VoidMonster();
 
 	@Override
 	@PreInit
@@ -59,7 +64,12 @@ public class VoidMonster extends DragonAPIMod {
 
 	@Override
 	public URL getDocumentationSite() {
-		return null;
+		try {
+			return new URL("http://www.minecraftforum.net/topic/1969694-");
+		}
+		catch (MalformedURLException e) {
+			throw new RegistrationException(instance, "The mod provided a malformed URL for its documentation site!");
+		}
 	}
 
 	@Override
