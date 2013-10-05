@@ -30,9 +30,4 @@ public class EntityVoidMonster extends EntityMob {
 		return isNether;
 	}
 
-	@Override
-	public int getMaxHealth() {
-		return 100;
-	}
-
 }
