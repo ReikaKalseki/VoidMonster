@@ -14,8 +14,10 @@ import java.net.URL;
 import Reika.DragonAPI.DragonAPICore;
 import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Instantiable.ModLogger;
+import Reika.DragonAPI.Libraries.ReikaRegistryHelper;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
@@ -29,13 +31,15 @@ serverPacketHandlerSpec = @SidedPacketHandler(channels = { "VoidMonsterData" }, 
 
 public class VoidMonster extends DragonAPIMod {
 
-	//@Instance
+	@Instance("VoidMonster")
 	public static VoidMonster instance = new VoidMonster();
 
 	@Override
 	@EventHandler
 	public void preload(FMLPreInitializationEvent evt) {
 
+		ReikaRegistryHelper.setupModData(instance, evt);
+		ReikaRegistryHelper.setupVersionChecking(evt);
 	}
 
 	@Override
