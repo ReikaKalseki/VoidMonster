@@ -11,6 +11,10 @@ package Reika.VoidMonster;
 
 import java.net.URL;
 
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.Event.Result;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
 import Reika.DragonAPI.DragonAPICore;
 import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Instantiable.ModLogger;
@@ -34,12 +38,17 @@ public class VoidMonster extends DragonAPIMod {
 	@Instance("VoidMonster")
 	public static VoidMonster instance = new VoidMonster();
 
+	public static ModLogger logger;
+
 	@Override
 	@EventHandler
 	public void preload(FMLPreInitializationEvent evt) {
+		MinecraftForge.EVENT_BUS.register(this);
 
 		ReikaRegistryHelper.setupModData(instance, evt);
 		ReikaRegistryHelper.setupVersionChecking(evt);
+
+		logger = new ModLogger(instance, true, false, false);
 	}
 
 	@Override
@@ -52,6 +61,13 @@ public class VoidMonster extends DragonAPIMod {
 	@EventHandler
 	public void postload(FMLPostInitializationEvent evt) {
 
+	}
+
+	@EventHandler
+	public void disallowDespawn(AllowDespawn d) {
+		EntityLivingBase e = d.entityLiving;
+		if (e instanceof EntityVoidMonster)
+			d.setResult(Result.DENY);
 	}
 
 	@Override
@@ -91,6 +107,6 @@ public class VoidMonster extends DragonAPIMod {
 
 	@Override
 	public ModLogger getModLogger() {
-		return null;
+		return logger;
 	}
 }
