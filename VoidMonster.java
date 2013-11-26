@@ -14,6 +14,7 @@ import java.net.URL;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.Event.Result;
+import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
 import Reika.DragonAPI.DragonAPICore;
 import Reika.DragonAPI.Base.DragonAPIMod;
@@ -63,11 +64,16 @@ public class VoidMonster extends DragonAPIMod {
 
 	}
 
-	@EventHandler
+	@ForgeSubscribe
 	public void disallowDespawn(AllowDespawn d) {
 		EntityLivingBase e = d.entityLiving;
 		if (e instanceof EntityVoidMonster)
 			d.setResult(Result.DENY);
+	}
+
+	@ForgeSubscribe
+	public void onPlayerSpawn(/*PlayerSpawnEvent*/) {
+
 	}
 
 	@Override
