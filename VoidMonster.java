@@ -15,6 +15,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.Event.Result;
 import net.minecraftforge.event.ForgeSubscribe;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
 import Reika.DragonAPI.DragonAPICore;
 import Reika.DragonAPI.Base.DragonAPIMod;
@@ -72,7 +73,7 @@ public class VoidMonster extends DragonAPIMod {
 	}
 
 	@ForgeSubscribe
-	public void onPlayerSpawn(/*PlayerSpawnEvent*/) {
+	public void onPlayerSpawn(LivingSpawnEvent e) {
 
 	}
 
