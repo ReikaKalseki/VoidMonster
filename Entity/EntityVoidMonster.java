@@ -12,6 +12,7 @@ package Reika.VoidMonster.Entity;
 import java.util.ArrayList;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockFluid;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -25,9 +26,13 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.BlockFluidBase;
 import Reika.DragonAPI.Instantiable.ItemDrop;
+import Reika.DragonAPI.Libraries.IO.ReikaSoundHelper;
 import Reika.DragonAPI.Libraries.MathSci.ReikaMathLibrary;
+import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
 import Reika.VoidMonster.VoidMonster;
 
 public final class EntityVoidMonster extends EntityMob {
@@ -50,6 +55,7 @@ public final class EntityVoidMonster extends EntityMob {
 		this.setSize(3, 3);
 
 		isImmuneToFire = true;
+		ignoreFrustumCheck = true;
 	}
 
 	@Override
@@ -120,6 +126,36 @@ public final class EntityVoidMonster extends EntityMob {
 		}
 
 		this.pushOutOfBlocks(posX, posY-4, posZ);
+
+		if (!worldObj.isRemote)
+			this.eatTorches();
+	}
+
+	private void eatTorches() {
+		int r = 3;
+		for (int i = -r; i <= r; i++) {
+			for (int j = -r; j <= r; j++) {
+				for (int k = -r; k <= r; k++) {
+					int x = MathHelper.floor_double(posX)+i;
+					int y = MathHelper.floor_double(posY)+j;
+					int z = MathHelper.floor_double(posZ)+k;
+					int id = worldObj.getBlockId(x, y, z);
+					if (id > 0) {
+						Block b = Block.blocksList[id];
+						if (b != null && !(b instanceof BlockFluid || b instanceof BlockFluidBase)) {
+							int meta = worldObj.getBlockMetadata(x, y, z);
+							if (!b.hasTileEntity(meta)) {
+								if (b.getLightValue(worldObj, x, y, z) > 0) {
+									ReikaWorldHelper.dropBlockAt(worldObj, x, y, z);
+									ReikaSoundHelper.playBreakSound(worldObj, x, y, z, b);
+									worldObj.setBlock(x, y, z, 0);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	@Override
