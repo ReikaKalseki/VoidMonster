@@ -257,6 +257,7 @@ public final class EntityVoidMonster extends EntityMob {
 		addDrop(Item.netherStalkSeeds, 8, 22);
 		addDrop(Item.netherStar, 1, 2);
 		addDrop(Block.obsidian, 6, 16);
+		addDrop(Item.gunpowder, 8, 12);
 	}
 
 	private static void addDrop(Item i) {
