@@ -9,7 +9,6 @@
  ******************************************************************************/
 package Reika.VoidMonster.World;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Random;
 
@@ -24,7 +23,6 @@ import cpw.mods.fml.common.TickType;
 
 public class MonsterGenerator implements ITickHandler {
 
-	private final ArrayList<Integer> dimIDs = new ArrayList();
 	private final Random rand = new Random();
 
 	public MonsterGenerator() {
@@ -51,7 +49,6 @@ public class MonsterGenerator implements ITickHandler {
 			ev.forceSpawn = true;
 			ev.setLocationAndAngles(ep.posX, -10, ep.posZ, 0, 0);
 			world.spawnEntityInWorld(ev);
-			dimIDs.add(world.provider.dimensionId);
 		}
 	}
 
@@ -66,7 +63,7 @@ public class MonsterGenerator implements ITickHandler {
 	}
 
 	private boolean canSpawnIn(World world) {
-		if (dimIDs.contains(world.provider.dimensionId) || world.playerEntities.isEmpty())
+		if (world.playerEntities.isEmpty())
 			return false;
 		if (world.getWorldInfo().getTerrainType() == WorldType.FLAT)
 			return false;
