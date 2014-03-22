@@ -18,6 +18,7 @@ import net.minecraftforge.event.Event.Result;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
 import Reika.DragonAPI.DragonAPICore;
+import Reika.DragonAPI.Auxiliary.DonatorController;
 import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
@@ -82,6 +83,8 @@ public class VoidMonster extends DragonAPIMod {
 		EntityRegistry.registerModEntity(EntityVoidMonster.class, "Void Monster", id, instance, 64, 20, true);
 
 		proxy.registerRenderers();
+
+		DonatorController.instance.addDonation(instance, "Seiryn", 10.00F);
 	}
 
 	@Override

@@ -144,7 +144,7 @@ public final class EntityVoidMonster extends EntityMob {
 						Block b = Block.blocksList[id];
 						if (b != null && !(b instanceof BlockFluid || b instanceof BlockFluidBase)) {
 							int meta = worldObj.getBlockMetadata(x, y, z);
-							if (!b.hasTileEntity(meta)) {
+							if (!b.hasTileEntity(meta) && b.blockHardness >= 0) {
 								if (b.getLightValue(worldObj, x, y, z) > 0) {
 									ReikaWorldHelper.dropBlockAt(worldObj, x, y, z);
 									ReikaSoundHelper.playBreakSound(worldObj, x, y, z, b);
