@@ -10,6 +10,7 @@
 package Reika.VoidMonster;
 
 import java.net.URL;
+import java.util.ArrayList;
 
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
@@ -55,12 +56,17 @@ public class VoidMonster extends DragonAPIMod {
 
 	public static final SimpleConfig config = new SimpleConfig(instance);
 
+	private static MonsterGenerator gen = new MonsterGenerator();
+
 	@Override
 	@EventHandler
 	public void preload(FMLPreInitializationEvent evt) {
-		//config.loadSubfolderedConfigFile(evt);
-		//config.loadDataFromFile(evt);
-		//config.finishReading();
+		config.loadSubfolderedConfigFile(evt);
+		config.loadDataFromFile(evt);
+		ArrayList<Integer> dimensions = config.getIntList("Control Setup", "Banned Dimensions", 1);
+		config.finishReading();
+
+		gen.banDimensions(dimensions);
 
 		MinecraftForge.EVENT_BUS.register(this);
 
@@ -73,7 +79,7 @@ public class VoidMonster extends DragonAPIMod {
 	@Override
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
-		TickRegistry.registerTickHandler(new MonsterGenerator(), Side.SERVER);
+		TickRegistry.registerTickHandler(gen, Side.SERVER);
 		TickRegistry.registerTickHandler(new AmbientSoundGenerator(), Side.CLIENT);
 
 		int id = EntityRegistry.findGlobalUniqueEntityId();

@@ -9,6 +9,7 @@
  ******************************************************************************/
 package Reika.VoidMonster.World;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Random;
 
@@ -17,6 +18,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.common.MinecraftForge;
+import Reika.DragonAPI.ModInteract.ExtraUtilsHandler;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
@@ -24,32 +26,19 @@ import cpw.mods.fml.common.TickType;
 public class MonsterGenerator implements ITickHandler {
 
 	private final Random rand = new Random();
+	private final ArrayList bannedDimensions = new ArrayList();
 
 	public MonsterGenerator() {
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 
 	private void spawn(World world, EntityPlayer ep) {
-		EntityVoidMonster ev = null;
-		switch(world.provider.dimensionId) {
-		case 0:
-			ev = new EntityVoidMonster(world);
-			break;
-		case 1:
-			//no spawn since the end is open and the monster could escape
-			break;
-		case -1:
-			ev = new EntityVoidMonster(world).setNether();
-			break;
-		default:
-			ev = new EntityVoidMonster(world);
-			break;
-		}
-		if (ev != null) {
-			ev.forceSpawn = true;
-			ev.setLocationAndAngles(ep.posX, -10, ep.posZ, 0, 0);
-			world.spawnEntityInWorld(ev);
-		}
+		EntityVoidMonster ev = new EntityVoidMonster(world);
+		if (world.provider.isHellWorld)
+			ev.setNether();
+		ev.forceSpawn = true;
+		ev.setLocationAndAngles(ep.posX, -10, ep.posZ, 0, 0);
+		world.spawnEntityInWorld(ev);
 	}
 
 	@Override
@@ -73,7 +62,13 @@ public class MonsterGenerator implements ITickHandler {
 				return false;
 			}
 		}
-		return true;
+		if (world.provider.dimensionId == 0)
+			return true;
+		if (world.provider.dimensionId == -1)
+			return true;
+		if (world.provider.dimensionId == ExtraUtilsHandler.getInstance().darkID)
+			return true;
+		return !bannedDimensions.contains(world.provider.dimensionId);
 	}
 
 	@Override
@@ -89,6 +84,10 @@ public class MonsterGenerator implements ITickHandler {
 	@Override
 	public String getLabel() {
 		return "Void Monster";
+	}
+
+	public void banDimensions(ArrayList<Integer> dimensions) {
+		bannedDimensions.add(dimensions);
 	}
 
 }
