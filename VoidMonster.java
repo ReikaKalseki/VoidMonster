@@ -61,6 +61,8 @@ public class VoidMonster extends DragonAPIMod {
 	@Override
 	@EventHandler
 	public void preload(FMLPreInitializationEvent evt) {
+		logger = new ModLogger(instance, true, false, false);
+
 		config.loadSubfolderedConfigFile(evt);
 		config.loadDataFromFile(evt);
 		ArrayList<Integer> dimensions = config.getIntList("Control Setup", "Banned Dimensions", 1);
@@ -72,8 +74,6 @@ public class VoidMonster extends DragonAPIMod {
 
 		ReikaRegistryHelper.setupModData(instance, evt);
 		ReikaRegistryHelper.setupVersionChecking(evt);
-
-		logger = new ModLogger(instance, true, false, false);
 	}
 
 	@Override

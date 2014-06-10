@@ -18,7 +18,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.common.MinecraftForge;
+import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.ModInteract.ExtraUtilsHandler;
+import Reika.VoidMonster.VoidMonster;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
@@ -26,7 +28,7 @@ import cpw.mods.fml.common.TickType;
 public class MonsterGenerator implements ITickHandler {
 
 	private final Random rand = new Random();
-	private final ArrayList bannedDimensions = new ArrayList();
+	private final ArrayList<Integer> bannedDimensions = new ArrayList();
 
 	public MonsterGenerator() {
 		MinecraftForge.EVENT_BUS.register(this);
@@ -62,13 +64,8 @@ public class MonsterGenerator implements ITickHandler {
 				return false;
 			}
 		}
-		if (world.provider.dimensionId == 0)
-			return true;
-		if (world.provider.dimensionId == -1)
-			return true;
-		if (world.provider.dimensionId == ExtraUtilsHandler.getInstance().darkID)
-			return true;
-		return !bannedDimensions.contains(world.provider.dimensionId);
+
+		return this.isHardcodedAllowed(world.provider.dimensionId) || !bannedDimensions.contains(world.provider.dimensionId);
 	}
 
 	@Override
@@ -87,7 +84,24 @@ public class MonsterGenerator implements ITickHandler {
 	}
 
 	public void banDimensions(ArrayList<Integer> dimensions) {
-		bannedDimensions.add(dimensions);
+		for (int i = 0; i < dimensions.size(); i++) {
+			int id = dimensions.get(i);
+			bannedDimensions.add(id);
+			if (this.isHardcodedAllowed(id))
+				VoidMonster.logger.log("Blacklist reqest for dimension ID "+id+", but this dimension may not be blacklisted.");
+			else
+				VoidMonster.logger.log("Dimension ID "+id+" blacklisted for monster spawn.");
+		}
+	}
+
+	private boolean isHardcodedAllowed(int id) {
+		if (id == 0)
+			return true;
+		if (id == -1)
+			return true;
+		if (ModList.EXTRAUTILS.isLoaded() && id == ExtraUtilsHandler.getInstance().darkID)
+			return true;
+		return false;
 	}
 
 }
