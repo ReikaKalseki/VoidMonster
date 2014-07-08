@@ -86,6 +86,9 @@ public final class EntityVoidMonster extends EntityMob {
 			worldObj.difficultySetting = 0;
 
 		innerRotation++;
+		if (innerRotation >= 3600) {
+			innerRotation = 0;
+		}
 	}
 
 	@Override
@@ -177,9 +180,6 @@ public final class EntityVoidMonster extends EntityMob {
 		return true;
 	}
 
-	/**
-	 * Get number of ticks, at least during which the living entity will be silent.
-	 */
 	@Override
 	public int getTalkInterval()
 	{
@@ -337,12 +337,15 @@ public final class EntityVoidMonster extends EntityMob {
 	public boolean attackEntityFrom(DamageSource src, float dmg) {
 		if (src.isFireDamage() || src == DamageSource.fall || src == DamageSource.outOfWorld || src == DamageSource.inWall || src == DamageSource.drown)
 			return false;
+		if (!(src.getEntity() instanceof EntityPlayer))
+			return false;
 		if (this.isHealing()) {
 			this.playSound("random.bowhit", 1, 1);
 			return false;
 		}
 		if (posY < 0)
 			return false;
+		dmg = Math.min(dmg, 20);
 		boolean flag = super.attackEntityFrom(src, dmg);
 		if (flag && src.getEntity() != null && this.getHealth() > 0) {
 			Entity e = src.getEntity();
@@ -427,7 +430,7 @@ public final class EntityVoidMonster extends EntityMob {
 	@Override
 	public AxisAlignedBB getCollisionBox(Entity entity)
 	{
-		if (entity instanceof EntityLivingBase) {
+		if (entity instanceof EntityLivingBase && !(entity instanceof EntityVoidMonster)) {
 			if (attackCooldown == 0) {
 				this.attackEntityAsMob(entity);
 				attackCooldown = 20;

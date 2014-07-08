@@ -9,6 +9,7 @@
  ******************************************************************************/
 package Reika.VoidMonster;
 
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -17,12 +18,15 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraftforge.event.Event.Result;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
+import thaumcraft.api.aspects.Aspect;
 import Reika.DragonAPI.DragonAPICore;
+import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.Auxiliary.CommandableUpdateChecker;
 import Reika.DragonAPI.Auxiliary.DonatorController;
 import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
+import Reika.DragonAPI.ModInteract.ReikaThaumHelper;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import Reika.VoidMonster.World.AmbientSoundGenerator;
 import Reika.VoidMonster.World.MonsterGenerator;
@@ -93,6 +97,33 @@ public class VoidMonster extends DragonAPIMod {
 	@EventHandler
 	public void postload(FMLPostInitializationEvent evt) {
 
+		if (ModList.THAUMCRAFT.isLoaded()) {
+			Object[] asp = {
+					Aspect.ELDRITCH, 40,
+					Aspect.VOID, 40,
+					Aspect.DARKNESS, 40,
+					Aspect.BEAST, 25,
+					Aspect.DEATH, 25,
+					Aspect.ENTROPY, 20,
+					Aspect.AURA, 5,
+					Aspect.ARMOR, 10,
+					Aspect.CRYSTAL, 10
+			};
+			ReikaThaumHelper.addAspects(EntityVoidMonster.class, asp);
+		}
+		if (ModList.MINEFACTORY.isLoaded()) {
+			try {
+				Class c = Class.forName("powercrystals.minefactoryreloaded.MFRRegistry");
+				Method m = c.getMethod("registerSafariNetBlacklist", Class.class);
+				m.invoke(null, EntityVoidMonster.class);
+				m = c.getMethod("registerAutoSpawnerBlacklistClass", Class.class);
+				m.invoke(null, EntityVoidMonster.class);
+			}
+			catch (Exception e) {
+				logger.logError("Could not blacklist Void Monster from MFR Safari Net!");
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@ForgeSubscribe
