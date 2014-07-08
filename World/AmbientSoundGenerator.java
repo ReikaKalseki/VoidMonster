@@ -34,7 +34,7 @@ public class AmbientSoundGenerator implements ITickHandler {
 		World world = ep.worldObj;
 		if (world.getWorldInfo().getTerrainType() != WorldType.FLAT) {
 			if (ep != null) {
-				if (rand.nextInt(20) == 0) {
+				if (rand.nextInt(200) == 0) {
 					if (ep.posY < 45) {
 						int x = MathHelper.floor_double(ep.posX);
 						int y = MathHelper.floor_double(ep.posY);
