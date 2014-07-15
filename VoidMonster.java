@@ -64,7 +64,7 @@ public class VoidMonster extends DragonAPIMod {
 	@Override
 	@EventHandler
 	public void preload(FMLPreInitializationEvent evt) {
-		logger = new ModLogger(instance, true, false, false);
+		logger = new ModLogger(instance, false);
 
 		config.loadSubfolderedConfigFile(evt);
 		config.loadDataFromFile(evt);

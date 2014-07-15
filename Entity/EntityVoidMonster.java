@@ -28,14 +28,16 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.common.FakePlayer;
 import net.minecraftforge.fluids.BlockFluidBase;
 import Reika.DragonAPI.Instantiable.ItemDrop;
 import Reika.DragonAPI.Libraries.IO.ReikaSoundHelper;
 import Reika.DragonAPI.Libraries.MathSci.ReikaMathLibrary;
 import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
+import Reika.RotaryCraft.API.RadarJammer;
 import Reika.VoidMonster.VoidMonster;
 
-public final class EntityVoidMonster extends EntityMob {
+public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 
 	private boolean isNether;
 
@@ -335,9 +337,12 @@ public final class EntityVoidMonster extends EntityMob {
 
 	@Override
 	public boolean attackEntityFrom(DamageSource src, float dmg) {
+		if (hitCooldown > 0)
+			return false;
 		if (src.isFireDamage() || src == DamageSource.fall || src == DamageSource.outOfWorld || src == DamageSource.inWall || src == DamageSource.drown)
 			return false;
-		if (!(src.getEntity() instanceof EntityPlayer))
+		Entity e = src.getEntity();
+		if (!(e instanceof EntityPlayer) || e instanceof FakePlayer)
 			return false;
 		if (this.isHealing()) {
 			this.playSound("random.bowhit", 1, 1);
@@ -347,9 +352,8 @@ public final class EntityVoidMonster extends EntityMob {
 			return false;
 		dmg = Math.min(dmg, 20);
 		boolean flag = super.attackEntityFrom(src, dmg);
-		if (flag && src.getEntity() != null && this.getHealth() > 0) {
-			Entity e = src.getEntity();
-			hitCooldown = 40;
+		if (flag && this.getHealth() > 0) {
+			hitCooldown = 50;
 			this.teleport(e);
 		}
 		return flag;
@@ -437,6 +441,11 @@ public final class EntityVoidMonster extends EntityMob {
 			}
 		}
 		return null;//AxisAlignedBB.getAABBPool().getAABB(posX, posY, posZ, posX, posY, posZ).expand(3, 3, 3);
+	}
+
+	@Override
+	public boolean jamRadar(World world, int radarX, int radarY, int radarZ) {
+		return true;
 	}
 
 }

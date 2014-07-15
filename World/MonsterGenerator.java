@@ -20,7 +20,6 @@ import net.minecraft.world.WorldType;
 import net.minecraftforge.common.MinecraftForge;
 import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.ModInteract.ExtraUtilsHandler;
-import Reika.VoidMonster.VoidMonster;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
@@ -86,11 +85,11 @@ public class MonsterGenerator implements ITickHandler {
 	public void banDimensions(ArrayList<Integer> dimensions) {
 		for (int i = 0; i < dimensions.size(); i++) {
 			int id = dimensions.get(i);
-			bannedDimensions.add(id);
+			bannedDimensions.add(id);/*
 			if (this.isHardcodedAllowed(id))
 				VoidMonster.logger.log("Blacklist reqest for dimension ID "+id+", but this dimension may not be blacklisted.");
 			else
-				VoidMonster.logger.log("Dimension ID "+id+" blacklisted for monster spawn.");
+				VoidMonster.logger.log("Dimension ID "+id+" blacklisted for monster spawn.");*/
 		}
 	}
 
