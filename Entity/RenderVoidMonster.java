@@ -18,7 +18,7 @@ import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 
-
+import Reika.DragonAPI.Libraries.Java.ReikaGLHelper.BlendMode;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -60,7 +60,7 @@ public class RenderVoidMonster extends RenderLiving {
 			float f4 = 0.5F;
 			GL11.glColor4f(f4, f4, f4, 1.0F);
 			GL11.glDisable(GL11.GL_LIGHTING);
-			GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);
+			BlendMode.ADDITIVE.apply();
 			double d = 1.05;
 			GL11.glScaled(d, d, d);
 			mainModel.render(ev, 0.0F, rot * 3.0F, 0, 0.0F, 0.0F, 0.0625F);
