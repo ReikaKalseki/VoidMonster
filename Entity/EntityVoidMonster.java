@@ -336,6 +336,11 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	}
 
 	@Override
+	public void setHealth(float health) {
+		super.setHealth(health);
+	}
+
+	@Override
 	public boolean attackEntityFrom(DamageSource src, float dmg) {
 		if (hitCooldown > 0)
 			return false;
