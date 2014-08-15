@@ -9,18 +9,19 @@
  ******************************************************************************/
 package Reika.VoidMonster.World;
 
-import java.util.EnumSet;
+import Reika.DragonAPI.Auxiliary.TickRegistry.TickHandler;
+import Reika.DragonAPI.Auxiliary.TickRegistry.TickType;
+
 import java.util.Random;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.common.MinecraftForge;
-import codechicken.lib.math.MathHelper;
-import cpw.mods.fml.common.ITickHandler;
-import cpw.mods.fml.common.TickType;
+import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 
-public class AmbientSoundGenerator implements ITickHandler {
+public class AmbientSoundGenerator implements TickHandler {
 
 	private final Random rand = new Random();
 
@@ -29,7 +30,7 @@ public class AmbientSoundGenerator implements ITickHandler {
 	}
 
 	@Override
-	public void tickStart(EnumSet<TickType> type, Object... tickData) {
+	public void tick(Object... tickData) {
 		EntityPlayer ep = (EntityPlayer)tickData[0];
 		World world = ep.worldObj;
 		if (world.getWorldInfo().getTerrainType() != WorldType.FLAT) {
@@ -59,13 +60,13 @@ public class AmbientSoundGenerator implements ITickHandler {
 	}
 
 	@Override
-	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
-
+	public TickType getType() {
+		return TickType.PLAYER;
 	}
 
 	@Override
-	public EnumSet<TickType> ticks() {
-		return EnumSet.of(TickType.PLAYER);
+	public Phase getPhase() {
+		return Phase.START;
 	}
 
 	@Override

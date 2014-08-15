@@ -9,20 +9,11 @@
  ******************************************************************************/
 package Reika.VoidMonster;
 
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.ArrayList;
-
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraftforge.event.Event.Result;
-import net.minecraftforge.event.ForgeSubscribe;
-import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
-import thaumcraft.api.aspects.Aspect;
 import Reika.DragonAPI.DragonAPICore;
 import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.Auxiliary.CommandableUpdateChecker;
 import Reika.DragonAPI.Auxiliary.DonatorController;
+import Reika.DragonAPI.Auxiliary.TickRegistry;
 import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
@@ -30,6 +21,15 @@ import Reika.DragonAPI.ModInteract.ReikaThaumHelper;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import Reika.VoidMonster.World.AmbientSoundGenerator;
 import Reika.VoidMonster.World.MonsterGenerator;
+
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.ArrayList;
+
+import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
+import thaumcraft.api.aspects.Aspect;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -37,15 +37,12 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.NetworkMod;
+import cpw.mods.fml.common.eventhandler.Event.Result;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.EntityRegistry;
-import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
 @Mod( modid = "VoidMonster", name="Void Monster", version="beta", certificateFingerprint = "@GET_FINGERPRINT@", dependencies="required-after:DragonAPI")
-@NetworkMod(clientSideRequired = true, serverSideRequired = true/*,
-clientPacketHandlerSpec = @SidedPacketHandler(channels = { "VoidMonsterData" }, packetHandler = ClientPackets.class),
-serverPacketHandlerSpec = @SidedPacketHandler(channels = { "VoidMonsterData" }, packetHandler = ServerPackets.class)*/)
 
 public class VoidMonster extends DragonAPIMod {
 
@@ -79,8 +76,8 @@ public class VoidMonster extends DragonAPIMod {
 	@Override
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
-		TickRegistry.registerTickHandler(gen, Side.SERVER);
-		TickRegistry.registerTickHandler(new AmbientSoundGenerator(), Side.CLIENT);
+		TickRegistry.instance.registerTickHandler(gen, Side.SERVER);
+		TickRegistry.instance.registerTickHandler(new AmbientSoundGenerator(), Side.CLIENT);
 
 		int id = EntityRegistry.findGlobalUniqueEntityId();
 		if (DragonAPICore.isReikasComputer())
@@ -126,7 +123,7 @@ public class VoidMonster extends DragonAPIMod {
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void disallowDespawn(AllowDespawn d) {
 		EntityLivingBase e = d.entityLiving;
 		if (e instanceof EntityVoidMonster)

@@ -9,16 +9,25 @@
  ******************************************************************************/
 package Reika.VoidMonster.Entity;
 
+import Reika.DragonAPI.Instantiable.ItemDrop;
+import Reika.DragonAPI.Libraries.IO.ReikaSoundHelper;
+import Reika.DragonAPI.Libraries.MathSci.ReikaMathLibrary;
+import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
+import Reika.RotaryCraft.API.RadarJammer;
+import Reika.VoidMonster.VoidMonster;
+
 import java.util.ArrayList;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockFluid;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -27,15 +36,10 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
-import net.minecraftforge.common.FakePlayer;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fluids.BlockFluidBase;
-import Reika.DragonAPI.Instantiable.ItemDrop;
-import Reika.DragonAPI.Libraries.IO.ReikaSoundHelper;
-import Reika.DragonAPI.Libraries.MathSci.ReikaMathLibrary;
-import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
-import Reika.RotaryCraft.API.RadarJammer;
-import Reika.VoidMonster.VoidMonster;
 
 public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 
@@ -71,21 +75,21 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	protected void applyEntityAttributes()
 	{
 		super.applyEntityAttributes();
-		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(200.0D);
-		this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setAttribute(16.0D);
+		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(200.0D);
+		this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(16.0D);
 	}
 
 	@Override
 	public void onUpdate()
 	{
 		boolean flag = false;
-		if (worldObj.difficultySetting == 0)
+		if (worldObj.difficultySetting == EnumDifficulty.PEACEFUL)
 			flag = true;
 		if (flag)
-			worldObj.difficultySetting = 1;
+			worldObj.difficultySetting = EnumDifficulty.EASY;
 		super.onUpdate();
 		if (flag)
-			worldObj.difficultySetting = 0;
+			worldObj.difficultySetting = EnumDifficulty.PEACEFUL;
 
 		innerRotation++;
 		if (innerRotation >= 3600) {
@@ -102,6 +106,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 			posY = -10;
 		motionY = 0;
 
+		entityToAttack = worldObj.getClosestPlayerToEntity(this, -1);
 		if (entityToAttack != null && hitCooldown == 0) {
 			double dx = posX-entityToAttack.posX;
 			double dy = posY-entityToAttack.posY-entityToAttack.getEyeHeight();
@@ -130,7 +135,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 			dataWatcher.updateObject(31, healTime);
 		}
 
-		this.pushOutOfBlocks(posX, posY-4, posZ);
+		this.func_145771_j(posX, posY-4, posZ);
 
 		if (!worldObj.isRemote)
 			this.eatTorches();
@@ -144,16 +149,15 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 					int x = MathHelper.floor_double(posX)+i;
 					int y = MathHelper.floor_double(posY)+j;
 					int z = MathHelper.floor_double(posZ)+k;
-					int id = worldObj.getBlockId(x, y, z);
-					if (id > 0) {
-						Block b = Block.blocksList[id];
-						if (b != null && !(b instanceof BlockFluid || b instanceof BlockFluidBase)) {
+					Block b = worldObj.getBlock(x, y, z);
+					if (b != Blocks.air) {
+						if (b != null && !(b instanceof BlockLiquid || b instanceof BlockFluidBase)) {
 							int meta = worldObj.getBlockMetadata(x, y, z);
-							if (!b.hasTileEntity(meta) && b.blockHardness >= 0) {
+							if (!b.hasTileEntity(meta) && b.getBlockHardness(worldObj, x, y, z) >= 0) {
 								if (b.getLightValue(worldObj, x, y, z) > 0) {
 									ReikaWorldHelper.dropBlockAt(worldObj, x, y, z);
 									ReikaSoundHelper.playBreakSound(worldObj, x, y, z, b);
-									worldObj.setBlock(x, y, z, 0);
+									worldObj.setBlockToAir(x, y, z);
 								}
 							}
 						}
@@ -246,20 +250,20 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	}
 
 	static {
-		addDrop(Item.diamond, 2, 8);
-		addDrop(new ItemStack(Item.enchantedBook), Enchantment.fortune, 3);
-		addDrop(new ItemStack(Item.enchantedBook), Enchantment.infinity, 1);
-		addDrop(new ItemStack(Item.enchantedBook), Enchantment.protection, 4);
-		addDrop(Item.ghastTear);
-		addDrop(Item.speckledMelon, 2, 5);
-		addDrop(Item.emerald, 2, 6);
-		addDrop(Item.enderPearl, 1, 3);
-		addDrop(Item.eyeOfEnder, 1, 3);
-		addDrop(Item.fireballCharge, 2, 8);
-		addDrop(Item.netherStalkSeeds, 8, 22);
-		addDrop(Item.netherStar, 1, 2);
-		addDrop(Block.obsidian, 6, 16);
-		addDrop(Item.gunpowder, 8, 12);
+		addDrop(Items.diamond, 2, 8);
+		addDrop(new ItemStack(Items.enchanted_book), Enchantment.fortune, 3);
+		addDrop(new ItemStack(Items.enchanted_book), Enchantment.infinity, 1);
+		addDrop(new ItemStack(Items.enchanted_book), Enchantment.protection, 4);
+		addDrop(Items.ghast_tear);
+		addDrop(Items.speckled_melon, 2, 5);
+		addDrop(Items.emerald, 2, 6);
+		addDrop(Items.ender_pearl, 1, 3);
+		addDrop(Items.ender_eye, 1, 3);
+		addDrop(Items.fire_charge, 2, 8);
+		addDrop(Items.nether_wart, 8, 22);
+		addDrop(Items.nether_star, 1, 2);
+		addDrop(Blocks.obsidian, 6, 16);
+		addDrop(Items.gunpowder, 8, 12);
 	}
 
 	private static void addDrop(Item i) {
@@ -408,7 +412,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	}
 
 	@Override
-	public String getEntityName() {
+	public String getCommandSenderName() {
 		return "Void Monster";
 	}
 
@@ -445,7 +449,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 				attackCooldown = 20;
 			}
 		}
-		return null;//AxisAlignedBB.getAABBPool().getAABB(posX, posY, posZ, posX, posY, posZ).expand(3, 3, 3);
+		return null;//AxisAlignedBB.getBoundingBox(posX, posY, posZ, posX, posY, posZ).expand(3, 3, 3);
 	}
 
 	@Override

@@ -9,8 +9,13 @@
  ******************************************************************************/
 package Reika.VoidMonster.World;
 
+import Reika.DragonAPI.ModList;
+import Reika.DragonAPI.Auxiliary.TickRegistry.TickHandler;
+import Reika.DragonAPI.Auxiliary.TickRegistry.TickType;
+import Reika.DragonAPI.ModInteract.ExtraUtilsHandler;
+import Reika.VoidMonster.Entity.EntityVoidMonster;
+
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.Random;
 
 import net.minecraft.entity.Entity;
@@ -18,13 +23,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.common.MinecraftForge;
-import Reika.DragonAPI.ModList;
-import Reika.DragonAPI.ModInteract.ExtraUtilsHandler;
-import Reika.VoidMonster.Entity.EntityVoidMonster;
-import cpw.mods.fml.common.ITickHandler;
-import cpw.mods.fml.common.TickType;
+import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 
-public class MonsterGenerator implements ITickHandler {
+public class MonsterGenerator implements TickHandler {
 
 	private final Random rand = new Random();
 	private final ArrayList<Integer> bannedDimensions = new ArrayList();
@@ -43,7 +44,7 @@ public class MonsterGenerator implements ITickHandler {
 	}
 
 	@Override
-	public void tickStart(EnumSet<TickType> type, Object... tickData) {
+	public void tick(Object... tickData) {
 		World world = (World)tickData[0];
 		if (world != null) {
 			if (this.canSpawnIn(world)) {
@@ -68,13 +69,13 @@ public class MonsterGenerator implements ITickHandler {
 	}
 
 	@Override
-	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
-
+	public TickType getType() {
+		return TickType.WORLD;
 	}
 
 	@Override
-	public EnumSet<TickType> ticks() {
-		return EnumSet.of(TickType.WORLD);
+	public Phase getPhase() {
+		return Phase.START;
 	}
 
 	@Override
