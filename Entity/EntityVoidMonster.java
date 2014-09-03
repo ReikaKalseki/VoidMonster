@@ -9,13 +9,6 @@
  ******************************************************************************/
 package Reika.VoidMonster.Entity;
 
-import Reika.DragonAPI.Instantiable.ItemDrop;
-import Reika.DragonAPI.Libraries.IO.ReikaSoundHelper;
-import Reika.DragonAPI.Libraries.MathSci.ReikaMathLibrary;
-import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
-import Reika.RotaryCraft.API.RadarJammer;
-import Reika.VoidMonster.VoidMonster;
-
 import java.util.ArrayList;
 
 import net.minecraft.block.Block;
@@ -40,6 +33,12 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fluids.BlockFluidBase;
+import Reika.DragonAPI.Instantiable.ItemDrop;
+import Reika.DragonAPI.Libraries.IO.ReikaSoundHelper;
+import Reika.DragonAPI.Libraries.MathSci.ReikaMathLibrary;
+import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
+import Reika.RotaryCraft.API.RadarJammer;
+import Reika.VoidMonster.VoidMonster;
 
 public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 

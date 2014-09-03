@@ -9,10 +9,9 @@
  ******************************************************************************/
 package Reika.VoidMonster;
 
+import net.minecraft.world.World;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import Reika.VoidMonster.Entity.RenderVoidMonster;
-
-import net.minecraft.world.World;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 

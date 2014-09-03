@@ -9,6 +9,14 @@
  ******************************************************************************/
 package Reika.VoidMonster;
 
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.ArrayList;
+
+import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
+import thaumcraft.api.aspects.Aspect;
 import Reika.DragonAPI.DragonAPICore;
 import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.Auxiliary.CommandableUpdateChecker;
@@ -21,15 +29,6 @@ import Reika.DragonAPI.ModInteract.ReikaThaumHelper;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import Reika.VoidMonster.World.AmbientSoundGenerator;
 import Reika.VoidMonster.World.MonsterGenerator;
-
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.ArrayList;
-
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
-import thaumcraft.api.aspects.Aspect;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;

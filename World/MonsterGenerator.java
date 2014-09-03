@@ -9,12 +9,6 @@
  ******************************************************************************/
 package Reika.VoidMonster.World;
 
-import Reika.DragonAPI.ModList;
-import Reika.DragonAPI.Auxiliary.TickRegistry.TickHandler;
-import Reika.DragonAPI.Auxiliary.TickRegistry.TickType;
-import Reika.DragonAPI.ModInteract.ExtraUtilsHandler;
-import Reika.VoidMonster.Entity.EntityVoidMonster;
-
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -23,6 +17,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.common.MinecraftForge;
+import Reika.DragonAPI.ModList;
+import Reika.DragonAPI.Auxiliary.TickRegistry.TickHandler;
+import Reika.DragonAPI.Auxiliary.TickRegistry.TickType;
+import Reika.DragonAPI.ModInteract.ExtraUtilsHandler;
+import Reika.VoidMonster.Entity.EntityVoidMonster;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 
 public class MonsterGenerator implements TickHandler {
@@ -74,8 +73,8 @@ public class MonsterGenerator implements TickHandler {
 	}
 
 	@Override
-	public Phase getPhase() {
-		return Phase.START;
+	public boolean canFire(Phase p) {
+		return p == Phase.START;
 	}
 
 	@Override

@@ -9,9 +9,6 @@
  ******************************************************************************/
 package Reika.VoidMonster.World;
 
-import Reika.DragonAPI.Auxiliary.TickRegistry.TickHandler;
-import Reika.DragonAPI.Auxiliary.TickRegistry.TickType;
-
 import java.util.Random;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,6 +16,8 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.common.MinecraftForge;
+import Reika.DragonAPI.Auxiliary.TickRegistry.TickHandler;
+import Reika.DragonAPI.Auxiliary.TickRegistry.TickType;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 
 public class AmbientSoundGenerator implements TickHandler {
@@ -65,8 +64,8 @@ public class AmbientSoundGenerator implements TickHandler {
 	}
 
 	@Override
-	public Phase getPhase() {
-		return Phase.START;
+	public boolean canFire(Phase p) {
+		return p == Phase.START;
 	}
 
 	@Override

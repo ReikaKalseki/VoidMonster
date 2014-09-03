@@ -9,8 +9,6 @@
  ******************************************************************************/
 package Reika.VoidMonster.Entity;
 
-import Reika.DragonAPI.Libraries.Java.ReikaGLHelper.BlendMode;
-
 import java.util.HashMap;
 
 import net.minecraft.client.renderer.entity.RenderLiving;
@@ -20,6 +18,7 @@ import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 
+import Reika.DragonAPI.Libraries.Java.ReikaGLHelper.BlendMode;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
