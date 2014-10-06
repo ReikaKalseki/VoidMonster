@@ -13,7 +13,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
 import thaumcraft.api.aspects.Aspect;
@@ -80,8 +79,8 @@ public class VoidMonster extends DragonAPIMod {
 		TickRegistry.instance.registerTickHandler(new AmbientSoundGenerator(), Side.CLIENT);
 
 		int id = EntityRegistry.findGlobalUniqueEntityId();
-		if (DragonAPICore.isReikasComputer())
-			EntityList.addMapping(EntityVoidMonster.class, "Void Monster", id, 0x000000, 0x555555);
+		//if (DragonAPICore.isReikasComputer())
+		//	EntityList.addMapping(EntityVoidMonster.class, "Void Monster", id, 0x000000, 0x555555);
 		EntityRegistry.registerGlobalEntityID(EntityVoidMonster.class, "Void Monster", id);
 		EntityRegistry.registerModEntity(EntityVoidMonster.class, "Void Monster", id, instance, 64, 20, true);
 
