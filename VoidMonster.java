@@ -9,6 +9,7 @@
  ******************************************************************************/
 package Reika.VoidMonster;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -117,6 +118,21 @@ public class VoidMonster extends DragonAPIMod {
 			}
 			catch (Exception e) {
 				logger.logError("Could not blacklist Void Monster from MFR Safari Net!");
+				e.printStackTrace();
+			}
+		}
+		if (ModList.ENDERIO.isLoaded()) {
+			try {
+				Class c = Class.forName("crazypants.enderio.config.Config");
+				Field f = c.getField("soulVesselBlackList");
+				String[] arr = (String[])f.get(null);
+				String[] newsg = new String[arr.length+1];
+				System.arraycopy(arr, 0, newsg, 0, arr.length);
+				newsg[arr.length] = "Void Monster";
+				f.set(null, newsg);
+			}
+			catch (Exception e) {
+				logger.logError("Could not blacklist Void Monster from EnderIO spawner!");
 				e.printStackTrace();
 			}
 		}
