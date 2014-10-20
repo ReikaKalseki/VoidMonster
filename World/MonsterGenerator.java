@@ -43,7 +43,7 @@ public class MonsterGenerator implements TickHandler {
 	}
 
 	@Override
-	public void tick(Object... tickData) {
+	public void tick(TickType type, Object... tickData) {
 		World world = (World)tickData[0];
 		if (world != null) {
 			if (this.canSpawnIn(world)) {
