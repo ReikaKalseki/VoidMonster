@@ -16,8 +16,8 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.common.MinecraftForge;
-import Reika.DragonAPI.Auxiliary.TickRegistry.TickHandler;
-import Reika.DragonAPI.Auxiliary.TickRegistry.TickType;
+import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry.TickHandler;
+import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry.TickType;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 
 public class AmbientSoundGenerator implements TickHandler {
