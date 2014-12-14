@@ -297,7 +297,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		it.enchant(e, level);
 		if (!drops.contains(it))
 			drops.add(it);
-		VoidMonster.instance.getModLogger().log("Adding monster drop "+is.getDisplayName()+", enchanted with "+e.getName()+" "+level);
+		VoidMonster.instance.getModLogger().log("Adding monster drop "+is.getDisplayName()+", enchanted with "+e.getTranslatedName(level));
 	}
 
 	private static void addDrop(ItemStack is, int min, int max, Enchantment e, int level) {
