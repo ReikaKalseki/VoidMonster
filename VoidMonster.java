@@ -19,6 +19,7 @@ import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
 import thaumcraft.api.aspects.Aspect;
 import Reika.DragonAPI.DragonAPICore;
 import Reika.DragonAPI.ModList;
+import Reika.DragonAPI.ASM.DependentMethodStripper.ModDependent;
 import Reika.DragonAPI.Auxiliary.Trackers.CommandableUpdateChecker;
 import Reika.DragonAPI.Auxiliary.Trackers.DonatorController;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry;
@@ -29,6 +30,9 @@ import Reika.DragonAPI.ModInteract.ReikaThaumHelper;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import Reika.VoidMonster.World.AmbientSoundGenerator;
 import Reika.VoidMonster.World.MonsterGenerator;
+
+import com.xcompwiz.mystcraft.api.event.LinkEvent;
+
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -136,6 +140,13 @@ public class VoidMonster extends DragonAPIMod {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	@SubscribeEvent
+	@ModDependent(ModList.MYSTCRAFT)
+	public void noLinking(LinkEvent.LinkEventAllow evt) {
+		if (evt.entity instanceof EntityVoidMonster)
+			evt.setCanceled(true);
 	}
 
 	@SubscribeEvent
