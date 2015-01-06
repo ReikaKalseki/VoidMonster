@@ -1,7 +1,7 @@
 /*******************************************************************************
  * @author Reika Kalseki
  * 
- * Copyright 2014
+ * Copyright 2015
  * 
  * All rights reserved.
  * Distribution of the software in any form is only allowed with
@@ -37,7 +37,7 @@ import Reika.DragonAPI.Instantiable.ItemDrop;
 import Reika.DragonAPI.Libraries.IO.ReikaSoundHelper;
 import Reika.DragonAPI.Libraries.MathSci.ReikaMathLibrary;
 import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
-import Reika.RotaryCraft.API.RadarJammer;
+import Reika.RotaryCraft.API.Interfaces.RadarJammer;
 import Reika.VoidMonster.VoidMonster;
 
 public final class EntityVoidMonster extends EntityMob implements RadarJammer {
