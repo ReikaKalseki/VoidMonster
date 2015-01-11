@@ -52,6 +52,8 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 
 	private static final ArrayList<ItemDrop> drops = new ArrayList();
 
+	private static final int monsterSoundDelay = calcSoundDelay();
+
 	public EntityVoidMonster(World world) {
 		super(world);
 		experienceValue = 20000;
@@ -61,6 +63,10 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 
 		isImmuneToFire = true;
 		ignoreFrustumCheck = true;
+	}
+
+	private static int calcSoundDelay() {
+		return Math.max(0, Math.min(1200, VoidMonster.config.getInteger("Control Setup", "Sound Interval in Ticks", 80)));
 	}
 
 	@Override
@@ -74,13 +80,18 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	protected void applyEntityAttributes()
 	{
 		super.applyEntityAttributes();
-		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(200.0D);
+		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(300.0D);
 		this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(16.0D);
 	}
 
 	@Override
 	public void onUpdate()
 	{
+		if (VoidMonster.blacklistedIn(worldObj)) {
+			this.setDead();
+			return;
+		}
+
 		boolean flag = false;
 		if (worldObj.difficultySetting == EnumDifficulty.PEACEFUL)
 			flag = true;
@@ -186,9 +197,15 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	}
 
 	@Override
+	public boolean isPotionApplicable(PotionEffect pot)
+	{
+		return false;
+	}
+
+	@Override
 	public int getTalkInterval()
 	{
-		return 80;
+		return monsterSoundDelay/2+rand.nextInt(1+monsterSoundDelay/2);
 	}
 
 	@Override

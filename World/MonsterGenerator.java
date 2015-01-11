@@ -64,7 +64,11 @@ public class MonsterGenerator implements TickHandler {
 			}
 		}
 
-		return this.isHardcodedAllowed(world.provider.dimensionId) || !bannedDimensions.contains(world.provider.dimensionId);
+		return this.isHardcodedAllowed(world.provider.dimensionId) || !this.isDimensionBanned(world);
+	}
+
+	public boolean isDimensionBanned(World world) {
+		return bannedDimensions.contains(world.provider.dimensionId);
 	}
 
 	@Override

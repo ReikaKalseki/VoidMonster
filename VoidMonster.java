@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
 import thaumcraft.api.aspects.Aspect;
 import Reika.DragonAPI.DragonAPICore;
@@ -24,6 +25,7 @@ import Reika.DragonAPI.Auxiliary.Trackers.CommandableUpdateChecker;
 import Reika.DragonAPI.Auxiliary.Trackers.DonatorController;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry;
 import Reika.DragonAPI.Base.DragonAPIMod;
+import Reika.DragonAPI.Base.DragonAPIMod.LoadProfiler.LoadPhase;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
 import Reika.DragonAPI.ModInteract.ReikaThaumHelper;
@@ -64,6 +66,7 @@ public class VoidMonster extends DragonAPIMod {
 	@Override
 	@EventHandler
 	public void preload(FMLPreInitializationEvent evt) {
+		this.startTiming(LoadPhase.PRELOAD);
 		this.verifyVersions();
 		logger = new ModLogger(instance, false);
 
@@ -75,11 +78,13 @@ public class VoidMonster extends DragonAPIMod {
 		gen.banDimensions(dimensions);
 
 		this.basicSetup(evt);
+		this.finishTiming();
 	}
 
 	@Override
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
+		this.startTiming(LoadPhase.LOAD);
 		TickRegistry.instance.registerTickHandler(gen, Side.SERVER);
 		TickRegistry.instance.registerTickHandler(new AmbientSoundGenerator(), Side.CLIENT);
 
@@ -92,11 +97,13 @@ public class VoidMonster extends DragonAPIMod {
 		proxy.registerRenderers();
 
 		DonatorController.instance.addDonation(instance, "Seiryn", 10.00F);
+		this.finishTiming();
 	}
 
 	@Override
 	@EventHandler
 	public void postload(FMLPostInitializationEvent evt) {
+		this.startTiming(LoadPhase.POSTLOAD);
 
 		if (ModList.THAUMCRAFT.isLoaded()) {
 			Object[] asp = {
@@ -140,6 +147,11 @@ public class VoidMonster extends DragonAPIMod {
 				e.printStackTrace();
 			}
 		}
+		this.finishTiming();
+	}
+
+	public static boolean blacklistedIn(World world) {
+		return gen.isDimensionBanned(world);
 	}
 
 	@SubscribeEvent
