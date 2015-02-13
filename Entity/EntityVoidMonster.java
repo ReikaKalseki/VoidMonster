@@ -242,9 +242,12 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	}
 
 	@Override
-	protected float getSoundVolume()
-	{
-		return 2F;
+	protected float getSoundVolume() {
+		EntityPlayer ep = worldObj.getClosestPlayerToEntity(this, 32);
+		if (ep == null)
+			return 0.5F;
+		float d = this.getDistanceToEntity(ep);
+		return d < 6 ? 2 : d < 12 ? 1 : 0.5F;
 	}
 
 	@Override

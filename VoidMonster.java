@@ -28,7 +28,7 @@ import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Base.DragonAPIMod.LoadProfiler.LoadPhase;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
-import Reika.DragonAPI.ModInteract.ReikaThaumHelper;
+import Reika.DragonAPI.ModInteract.DeepInteract.ReikaThaumHelper;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import Reika.VoidMonster.World.AmbientSoundGenerator;
 import Reika.VoidMonster.World.MonsterGenerator;

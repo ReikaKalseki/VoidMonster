@@ -20,7 +20,7 @@ import net.minecraftforge.common.MinecraftForge;
 import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry.TickHandler;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry.TickType;
-import Reika.DragonAPI.ModInteract.ExtraUtilsHandler;
+import Reika.DragonAPI.ModInteract.ItemHandlers.ExtraUtilsHandler;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 
