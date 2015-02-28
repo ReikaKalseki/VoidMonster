@@ -108,8 +108,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	}
 
 	@Override
-	public void onLivingUpdate()
-	{
+	public void onLivingUpdate() {
 		super.onLivingUpdate();
 
 		if (posY < -40)
