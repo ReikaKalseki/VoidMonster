@@ -9,6 +9,7 @@
  ******************************************************************************/
 package Reika.VoidMonster.World;
 
+import java.util.HashSet;
 import java.util.Random;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,15 +17,21 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.common.MinecraftForge;
+import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry.TickHandler;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry.TickType;
+import Reika.DragonAPI.ModInteract.ItemHandlers.ExtraUtilsHandler;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 
 public class AmbientSoundGenerator implements TickHandler {
 
+	public static final AmbientSoundGenerator instance = new AmbientSoundGenerator();
+
 	private final Random rand = new Random();
 
-	public AmbientSoundGenerator() {
+	private final HashSet<Integer> bannedDimensions = new HashSet();
+
+	private AmbientSoundGenerator() {
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 
@@ -32,7 +39,7 @@ public class AmbientSoundGenerator implements TickHandler {
 	public void tick(TickType type, Object... tickData) {
 		EntityPlayer ep = (EntityPlayer)tickData[0];
 		World world = ep.worldObj;
-		if (world.getWorldInfo().getTerrainType() != WorldType.FLAT) {
+		if (this.canSpawnSounds(world)) {
 			if (ep != null) {
 				if (rand.nextInt(200) == 0) {
 					if (ep.posY < 45) {
@@ -56,6 +63,26 @@ public class AmbientSoundGenerator implements TickHandler {
 				}
 			}
 		}
+	}
+
+	private boolean canSpawnSounds(World world) {
+		if (world.getWorldInfo().getTerrainType() == WorldType.FLAT)
+			return false;
+		return this.isHardcodedAllowed(world.provider.dimensionId) || !bannedDimensions.contains(world.provider.dimensionId);
+	}
+
+	public void blacklistDimension(int id) {
+		bannedDimensions.add(id);
+	}
+
+	private boolean isHardcodedAllowed(int id) {
+		if (id == 0)
+			return true;
+		if (id == -1)
+			return true;
+		if (ModList.EXTRAUTILS.isLoaded() && id == ExtraUtilsHandler.getInstance().darkID)
+			return true;
+		return false;
 	}
 
 	@Override

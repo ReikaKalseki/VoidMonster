@@ -10,6 +10,7 @@
 package Reika.VoidMonster.World;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 
 import net.minecraft.entity.Entity;
@@ -26,10 +27,12 @@ import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 
 public class MonsterGenerator implements TickHandler {
 
-	private final Random rand = new Random();
-	private final ArrayList<Integer> bannedDimensions = new ArrayList();
+	public static final MonsterGenerator instance = new MonsterGenerator();
 
-	public MonsterGenerator() {
+	private final Random rand = new Random();
+	private final HashSet<Integer> bannedDimensions = new HashSet();
+
+	private MonsterGenerator() {
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 
@@ -87,14 +90,17 @@ public class MonsterGenerator implements TickHandler {
 	}
 
 	public void banDimensions(ArrayList<Integer> dimensions) {
-		for (int i = 0; i < dimensions.size(); i++) {
-			int id = dimensions.get(i);
-			bannedDimensions.add(id);/*
-			if (this.isHardcodedAllowed(id))
-				VoidMonster.logger.log("Blacklist reqest for dimension ID "+id+", but this dimension may not be blacklisted.");
-			else
-				VoidMonster.logger.log("Dimension ID "+id+" blacklisted for monster spawn.");*/
+		for (int id : dimensions) {
+			this.banDimension(id);
 		}
+	}
+
+	public void banDimension(int id) {
+		bannedDimensions.add(id);/*
+		if (this.isHardcodedAllowed(id))
+			VoidMonster.logger.log("Blacklist reqest for dimension ID "+id+", but this dimension may not be blacklisted.");
+		else
+			VoidMonster.logger.log("Dimension ID "+id+" blacklisted for monster spawn.");*/
 	}
 
 	private boolean isHardcodedAllowed(int id) {

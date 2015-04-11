@@ -61,8 +61,6 @@ public class VoidMonster extends DragonAPIMod {
 
 	public static final SimpleConfig config = new SimpleConfig(instance);
 
-	private static MonsterGenerator gen = new MonsterGenerator();
-
 	@Override
 	@EventHandler
 	public void preload(FMLPreInitializationEvent evt) {
@@ -75,7 +73,7 @@ public class VoidMonster extends DragonAPIMod {
 		ArrayList<Integer> dimensions = config.getIntList("Control Setup", "Banned Dimensions", 1);
 		config.finishReading();
 
-		gen.banDimensions(dimensions);
+		MonsterGenerator.instance.banDimensions(dimensions);
 
 		this.basicSetup(evt);
 		this.finishTiming();
@@ -85,8 +83,8 @@ public class VoidMonster extends DragonAPIMod {
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
 		this.startTiming(LoadPhase.LOAD);
-		TickRegistry.instance.registerTickHandler(gen, Side.SERVER);
-		TickRegistry.instance.registerTickHandler(new AmbientSoundGenerator(), Side.CLIENT);
+		TickRegistry.instance.registerTickHandler(MonsterGenerator.instance, Side.SERVER);
+		TickRegistry.instance.registerTickHandler(AmbientSoundGenerator.instance, Side.CLIENT);
 
 		int id = EntityRegistry.findGlobalUniqueEntityId();
 		//if (DragonAPICore.isReikasComputer())
@@ -151,7 +149,7 @@ public class VoidMonster extends DragonAPIMod {
 	}
 
 	public static boolean blacklistedIn(World world) {
-		return gen.isDimensionBanned(world);
+		return MonsterGenerator.instance.isDimensionBanned(world);
 	}
 
 	@SubscribeEvent
