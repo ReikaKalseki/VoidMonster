@@ -19,6 +19,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
 import thaumcraft.api.aspects.Aspect;
 import Reika.DragonAPI.DragonAPICore;
+import Reika.DragonAPI.DragonOptions;
 import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.ASM.DependentMethodStripper.ModDependent;
 import Reika.DragonAPI.Auxiliary.Trackers.CommandableUpdateChecker;
@@ -45,7 +46,6 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.EntityRegistry;
-import cpw.mods.fml.relauncher.Side;
 
 @Mod( modid = "VoidMonster", name="Void Monster", certificateFingerprint = "@GET_FINGERPRINT@", dependencies="required-after:DragonAPI")
 
@@ -67,6 +67,8 @@ public class VoidMonster extends DragonAPIMod {
 		this.startTiming(LoadPhase.PRELOAD);
 		this.verifyInstallation();
 		logger = new ModLogger(instance, false);
+		if (DragonOptions.FILELOG.getState())
+			logger.setOutput("**_Loading_Log.log");
 
 		config.loadSubfolderedConfigFile(evt);
 		config.loadDataFromFile(evt);
@@ -83,8 +85,8 @@ public class VoidMonster extends DragonAPIMod {
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
 		this.startTiming(LoadPhase.LOAD);
-		TickRegistry.instance.registerTickHandler(MonsterGenerator.instance, Side.SERVER);
-		TickRegistry.instance.registerTickHandler(AmbientSoundGenerator.instance, Side.CLIENT);
+		TickRegistry.instance.registerTickHandler(MonsterGenerator.instance);
+		TickRegistry.instance.registerTickHandler(AmbientSoundGenerator.instance);
 
 		int id = EntityRegistry.findGlobalUniqueEntityId();
 		//if (DragonAPICore.isReikasComputer())

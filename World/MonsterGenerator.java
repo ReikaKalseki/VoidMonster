@@ -10,7 +10,9 @@
 package Reika.VoidMonster.World;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 
 import net.minecraft.entity.Entity;
@@ -21,6 +23,7 @@ import net.minecraftforge.common.MinecraftForge;
 import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry.TickHandler;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry.TickType;
+import Reika.DragonAPI.Libraries.ReikaPlayerAPI;
 import Reika.DragonAPI.ModInteract.ItemHandlers.ExtraUtilsHandler;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
@@ -50,9 +53,26 @@ public class MonsterGenerator implements TickHandler {
 		World world = (World)tickData[0];
 		if (world != null) {
 			if (this.canSpawnIn(world)) {
-				this.spawn(world, (EntityPlayer)world.playerEntities.get(0));
+				EntityPlayer ep = this.getRandomPlayer(world);
+				if (ep != null) {
+					this.spawn(world, ep);
+				}
 			}
 		}
+	}
+
+	private EntityPlayer getRandomPlayer(World world) {
+		ArrayList<EntityPlayer> li = new ArrayList(world.playerEntities);
+		int idx = rand.nextInt(li.size());
+		EntityPlayer ep = li.get(idx);
+		while (ReikaPlayerAPI.isFake(ep)) {
+			li.remove(idx);
+			if (li.isEmpty())
+				return null;
+			idx = rand.nextInt(li.size());
+			ep = li.get(idx);
+		}
+		return ep;
 	}
 
 	private boolean canSpawnIn(World world) {
@@ -60,8 +80,7 @@ public class MonsterGenerator implements TickHandler {
 			return false;
 		if (world.getWorldInfo().getTerrainType() == WorldType.FLAT)
 			return false;
-		for (int i = 0; i < world.loadedEntityList.size(); i++) {
-			Entity e = (Entity)world.loadedEntityList.get(i);
+		for (Entity e : ((List<Entity>)world.loadedEntityList)) {
 			if (e instanceof EntityVoidMonster) {
 				return false;
 			}
@@ -75,8 +94,8 @@ public class MonsterGenerator implements TickHandler {
 	}
 
 	@Override
-	public TickType getType() {
-		return TickType.WORLD;
+	public EnumSet<TickType> getType() {
+		return EnumSet.of(TickType.WORLD);
 	}
 
 	@Override

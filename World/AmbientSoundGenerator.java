@@ -9,6 +9,7 @@
  ******************************************************************************/
 package Reika.VoidMonster.World;
 
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -86,8 +87,8 @@ public class AmbientSoundGenerator implements TickHandler {
 	}
 
 	@Override
-	public TickType getType() {
-		return TickType.PLAYER;
+	public EnumSet<TickType> getType() {
+		return EnumSet.of(TickType.PLAYER);
 	}
 
 	@Override
