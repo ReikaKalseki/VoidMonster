@@ -164,7 +164,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 							int meta = worldObj.getBlockMetadata(x, y, z);
 							if (!b.hasTileEntity(meta) && b.getBlockHardness(worldObj, x, y, z) >= 0) {
 								if (b.getLightValue(worldObj, x, y, z) > 0) {
-									ReikaWorldHelper.dropBlockAt(worldObj, x, y, z);
+									ReikaWorldHelper.dropBlockAt(worldObj, x, y, z, null);
 									ReikaSoundHelper.playBreakSound(worldObj, x, y, z, b);
 									worldObj.setBlockToAir(x, y, z);
 								}
@@ -218,24 +218,24 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	protected String getLivingSound()
 	{
 		switch(rand.nextInt(9)) {
-		case 0:
-			return "mob.enderdragon.growl";
-		case 1:
-			return "mob.wither.death";
-		case 2:
-			return "mob.zombiepig.zpigdeath";
-		case 3:
-			return "mob.irongolem.death";
-		case 4:
-			return "mob.ghast.death";
-		case 5:
-			return "mob.zombiepig.zpig";
-		case 6:
-			return "mob.zombie.say";
-		case 7:
-			return "mob.zombie.death";
-		case 8:
-			return "mob.wither.idle";
+			case 0:
+				return "mob.enderdragon.growl";
+			case 1:
+				return "mob.wither.death";
+			case 2:
+				return "mob.zombiepig.zpigdeath";
+			case 3:
+				return "mob.irongolem.death";
+			case 4:
+				return "mob.ghast.death";
+			case 5:
+				return "mob.zombiepig.zpig";
+			case 6:
+				return "mob.zombie.say";
+			case 7:
+				return "mob.zombie.death";
+			case 8:
+				return "mob.wither.idle";
 		}
 		return null;
 	}
