@@ -66,6 +66,7 @@ public class VoidMonster extends DragonAPIMod {
 	public void preload(FMLPreInitializationEvent evt) {
 		this.startTiming(LoadPhase.PRELOAD);
 		this.verifyInstallation();
+
 		logger = new ModLogger(instance, false);
 		if (DragonOptions.FILELOG.getState())
 			logger.setOutput("**_Loading_Log.log");

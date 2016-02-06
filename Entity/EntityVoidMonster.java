@@ -377,7 +377,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		}
 		if (posY < 0)
 			return false;
-		dmg = Math.min(dmg, 20);
+		dmg = Math.min(dmg, src.isMagicDamage() && dmg > 5000 ? 100 : 20);
 		boolean flag = super.attackEntityFrom(src, dmg);
 		if (flag && this.getHealth() > 0) {
 			hitCooldown = 50;
