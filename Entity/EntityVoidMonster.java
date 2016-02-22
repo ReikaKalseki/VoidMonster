@@ -31,12 +31,13 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fluids.BlockFluidBase;
+import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.Instantiable.ItemDrop;
 import Reika.DragonAPI.Libraries.IO.ReikaSoundHelper;
 import Reika.DragonAPI.Libraries.MathSci.ReikaMathLibrary;
 import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
+import Reika.DragonAPI.ModInteract.ItemHandlers.ThaumItemHelper;
 import Reika.RotaryCraft.API.Interfaces.RadarJammer;
 import Reika.VoidMonster.VoidMonster;
 
@@ -52,8 +53,6 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 
 	private static final ArrayList<ItemDrop> drops = new ArrayList();
 
-	private static final int monsterSoundDelay = calcSoundDelay();
-
 	public EntityVoidMonster(World world) {
 		super(world);
 		experienceValue = 20000;
@@ -63,10 +62,6 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 
 		isImmuneToFire = true;
 		ignoreFrustumCheck = true;
-	}
-
-	private static int calcSoundDelay() {
-		return Math.max(0, Math.min(1200, VoidMonster.config.getInteger("Control Setup", "Sound Interval in Ticks", 80)));
 	}
 
 	@Override
@@ -204,7 +199,8 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	@Override
 	public int getTalkInterval()
 	{
-		return monsterSoundDelay/2+rand.nextInt(1+monsterSoundDelay/2);
+		int delay = VoidMonster.instance.getMonsterSoundDelay();
+		return delay/2+rand.nextInt(1+delay/2);
 	}
 
 	@Override
@@ -369,15 +365,28 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		if (src.isFireDamage() || src == DamageSource.fall || src == DamageSource.outOfWorld || src == DamageSource.inWall || src == DamageSource.drown)
 			return false;
 		Entity e = src.getEntity();
-		if (!(e instanceof EntityPlayer) || e instanceof FakePlayer)
+		if (!(e instanceof EntityPlayer))
 			return false;
+		float cap = 20;
+		if (src.isMagicDamage() && dmg > 5000)
+			cap = 100;
+		EntityPlayer ep = (EntityPlayer)e;
+		ItemStack weapon = ep.getCurrentEquippedItem();
+		if (ModList.THAUMCRAFT.isLoaded()) {
+			if (ThaumItemHelper.isVoidMetalTool(weapon)) {
+				cap *= 2F;
+			}
+			else if (ThaumItemHelper.isWarpingTool(weapon)) {
+				cap *= 1.5F;
+			}
+		}
 		if (this.isHealing()) {
 			this.playSound("random.bowhit", 1, 1);
 			return false;
 		}
 		if (posY < 0)
 			return false;
-		dmg = Math.min(dmg, src.isMagicDamage() && dmg > 5000 ? 100 : 20);
+		dmg = Math.min(dmg, cap);
 		boolean flag = super.attackEntityFrom(src, dmg);
 		if (flag && this.getHealth() > 0) {
 			hitCooldown = 50;

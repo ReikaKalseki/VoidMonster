@@ -44,7 +44,7 @@ public class MonsterGenerator implements TickHandler {
 		if (world.provider.isHellWorld)
 			ev.setNether();
 		ev.forceSpawn = true;
-		ev.setLocationAndAngles(ep.posX, -10, ep.posZ, 0, 0);
+		ev.setLocationAndAngles(ep.posX, ev.isNetherVoid() ? 260 : -10, ep.posZ, 0, 0);
 		world.spawnEntityInWorld(ev);
 	}
 

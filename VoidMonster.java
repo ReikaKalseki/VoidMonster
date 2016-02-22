@@ -47,8 +47,7 @@ import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.EntityRegistry;
 
-@Mod( modid = "VoidMonster", name="Void Monster", certificateFingerprint = "@GET_FINGERPRINT@", dependencies="required-after:DragonAPI")
-
+@Mod( modid = "VoidMonster", name="Void Monster", certificateFingerprint = "@GET_FINGERPRINT@", dependencies="required-after:DragonAPI;before:Morph")
 public class VoidMonster extends DragonAPIMod {
 
 	@Instance("VoidMonster")
@@ -60,6 +59,8 @@ public class VoidMonster extends DragonAPIMod {
 	public static VoidCommon proxy;
 
 	public static final SimpleConfig config = new SimpleConfig(instance);
+
+	private int monsterSoundDelay;
 
 	@Override
 	@EventHandler
@@ -77,6 +78,7 @@ public class VoidMonster extends DragonAPIMod {
 		config.finishReading();
 
 		MonsterGenerator.instance.banDimensions(dimensions);
+		monsterSoundDelay = Math.max(0, Math.min(1200, VoidMonster.config.getInteger("Control Setup", "Sound Interval in Ticks", 80)));
 
 		this.basicSetup(evt);
 		this.finishTiming();
@@ -153,6 +155,10 @@ public class VoidMonster extends DragonAPIMod {
 
 	public static boolean blacklistedIn(World world) {
 		return MonsterGenerator.instance.isDimensionBanned(world);
+	}
+
+	public int getMonsterSoundDelay() {
+		return monsterSoundDelay;
 	}
 
 	@SubscribeEvent
