@@ -122,6 +122,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 			motionZ = -dz/dist/16D;
 			velocityChanged = true;
 		}
+
 		if (hitCooldown > 0)
 			hitCooldown--;
 		if (attackCooldown > 0)

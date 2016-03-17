@@ -40,8 +40,10 @@ public class RenderVoidMonster extends RenderLiving {
 	protected void preRenderVoidMonster(EntityVoidMonster ev, float par2)
 	{
 		float rot = ev.innerRotation + par2;
+		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 		GL11.glPushMatrix();
 		double s = 2+Math.sin(Math.toRadians(rot*4));
+		GL11.glTranslated(0, -1.5-s/2, 0);
 		GL11.glScaled(s, s, s);
 		this.bindTexture(this.getTexture("end_portal"));
 		mainModel.render(ev, 0.0F, rot * 3.0F, 0, 0.0F, 0.0F, 0.0625F);
@@ -70,6 +72,7 @@ public class RenderVoidMonster extends RenderLiving {
 
 		}
 
+		GL11.glPopAttrib();
 		GL11.glPopMatrix();
 	}
 
