@@ -75,8 +75,13 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	protected void applyEntityAttributes()
 	{
 		super.applyEntityAttributes();
-		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(300.0D);
-		this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(16.0D);
+		float f = this.getDifficulty();
+		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(300.0D*f*f);
+		this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(16.0D*f);
+	}
+
+	private float getDifficulty() {
+		return VoidMonster.instance.getMonsterDifficulty();
 	}
 
 	@Override
@@ -131,10 +136,10 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		if (!worldObj.isRemote) {
 			if (this.isHealing()) {
 				healTime--;
-				this.heal(0.25F);
+				this.heal(0.25F*this.getDifficulty());
 			}
 			else if (this.isAtLessHealth()) {
-				if (rand.nextInt(80) == 0)
+				if (rand.nextInt((int)(80/this.getDifficulty())) == 0)
 					healTime = 40;
 			}
 			dataWatcher.updateObject(31, healTime);
@@ -371,6 +376,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		float cap = 20;
 		if (src.isMagicDamage() && dmg > 5000)
 			cap = 100;
+		cap /= this.getDifficulty();
 		EntityPlayer ep = (EntityPlayer)e;
 		ItemStack weapon = ep.getCurrentEquippedItem();
 		if (ModList.THAUMCRAFT.isLoaded()) {
@@ -428,7 +434,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 			if (isNether) {
 				e.setFire(10);
 			}
-			this.heal(2);
+			this.heal(2*this.getDifficulty());
 		}
 		return flag;
 	}

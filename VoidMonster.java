@@ -61,6 +61,7 @@ public class VoidMonster extends DragonAPIMod {
 	public static final SimpleConfig config = new SimpleConfig(instance);
 
 	private int monsterSoundDelay;
+	private float monsterDifficulty;
 
 	@Override
 	@EventHandler
@@ -76,6 +77,8 @@ public class VoidMonster extends DragonAPIMod {
 		config.loadDataFromFile(evt);
 		ArrayList<Integer> dimensions = config.getIntList("Control Setup", "Banned Dimensions", 1);
 		config.finishReading();
+
+		monsterDifficulty = config.getFloat("Control Setup", "Void Monster Difficulty Factor", 1F);
 
 		MonsterGenerator.instance.banDimensions(dimensions);
 		monsterSoundDelay = Math.max(0, Math.min(1200, VoidMonster.config.getInteger("Control Setup", "Sound Interval in Ticks", 80)));
@@ -99,7 +102,7 @@ public class VoidMonster extends DragonAPIMod {
 
 		proxy.registerRenderers();
 
-		DonatorController.instance.addDonation(instance, "Seiryn", 10.00F);
+		DonatorController.instance.registerMod(this, DonatorController.reikaURL);
 		this.finishTiming();
 	}
 
@@ -159,6 +162,10 @@ public class VoidMonster extends DragonAPIMod {
 
 	public int getMonsterSoundDelay() {
 		return monsterSoundDelay;
+	}
+
+	public float getMonsterDifficulty() {
+		return monsterDifficulty;
 	}
 
 	@SubscribeEvent
