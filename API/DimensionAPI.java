@@ -19,7 +19,7 @@ public class DimensionAPI {
 	}
 
 	public static void blacklistDimensionForSpawning(int id) {
-		MonsterGenerator.instance.banDimension(id);
+		MonsterGenerator.instance.banDimensionAPI(id);
 	}
 
 }

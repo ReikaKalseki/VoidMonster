@@ -12,7 +12,6 @@ package Reika.VoidMonster;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.ArrayList;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.world.World;
@@ -27,6 +26,7 @@ import Reika.DragonAPI.Auxiliary.Trackers.DonatorController;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry;
 import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Base.DragonAPIMod.LoadProfiler.LoadPhase;
+import Reika.DragonAPI.Instantiable.Event.ConfigReloadEvent;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
 import Reika.DragonAPI.ModInteract.DeepInteract.ReikaThaumHelper;
@@ -75,12 +75,12 @@ public class VoidMonster extends DragonAPIMod {
 
 		config.loadSubfolderedConfigFile(evt);
 		config.loadDataFromFile(evt);
-		ArrayList<Integer> dimensions = config.getIntList("Control Setup", "Banned Dimensions", 1);
 		config.finishReading();
 
 		monsterDifficulty = config.getFloat("Control Setup", "Void Monster Difficulty Factor", 1F);
 
-		MonsterGenerator.instance.banDimensions(dimensions);
+		MonsterGenerator.instance.loadConfig(config);
+
 		monsterSoundDelay = Math.max(0, Math.min(1200, VoidMonster.config.getInteger("Control Setup", "Sound Interval in Ticks", 80)));
 
 		this.basicSetup(evt);
@@ -166,6 +166,11 @@ public class VoidMonster extends DragonAPIMod {
 
 	public float getMonsterDifficulty() {
 		return monsterDifficulty;
+	}
+
+	@SubscribeEvent
+	public void reloadConfig(ConfigReloadEvent d) {
+		MonsterGenerator.instance.loadConfig(config);
 	}
 
 	@SubscribeEvent

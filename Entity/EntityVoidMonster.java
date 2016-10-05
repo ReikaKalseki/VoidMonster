@@ -32,10 +32,15 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.BlockFluidBase;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.Instantiable.ItemDrop;
+import Reika.DragonAPI.Libraries.ReikaEnchantmentHelper;
 import Reika.DragonAPI.Libraries.IO.ReikaSoundHelper;
 import Reika.DragonAPI.Libraries.MathSci.ReikaMathLibrary;
+import Reika.DragonAPI.Libraries.Registry.ReikaItemHelper;
 import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
 import Reika.DragonAPI.ModInteract.ItemHandlers.ThaumItemHelper;
 import Reika.RotaryCraft.API.Interfaces.RadarJammer;
@@ -271,9 +276,6 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 
 	static {
 		addDrop(Items.diamond, 2, 8);
-		addDrop(new ItemStack(Items.enchanted_book), Enchantment.fortune, 3);
-		addDrop(new ItemStack(Items.enchanted_book), Enchantment.infinity, 1);
-		addDrop(new ItemStack(Items.enchanted_book), Enchantment.protection, 4);
 		addDrop(Items.ghast_tear);
 		addDrop(Items.speckled_melon, 2, 5);
 		addDrop(Items.emerald, 2, 6);
@@ -335,6 +337,21 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		for (int i = 0; i < drops.size(); i++) {
 			ItemDrop it = drops.get(i);
 			it.drop(this);
+		}
+		this.dropEnchantBooks();
+		ReikaWorldHelper.splitAndSpawnXP(worldObj, posX, posY, posZ, experienceValue);
+	}
+
+	private void dropEnchantBooks() {
+		ArrayList<ImmutablePair<Enchantment, Integer>> li = new ArrayList();
+		int n = 1+2*MathHelper.ceiling_float_int(Math.max(1, 1+this.getDifficulty()));
+		for (int i = 0; i < n; i++) {
+			Enchantment e = ReikaEnchantmentHelper.getRandomEnchantment(null, false);
+			int l = 1+rand.nextInt(e.getMaxLevel());
+			li.add(new ImmutablePair(e, l));
+		}
+		for (ImmutablePair<Enchantment, Integer> p : li) {
+			ReikaItemHelper.dropItem(worldObj, posX, posY+0.25, posZ, ReikaEnchantmentHelper.getEnchantedBook(p.left, p.right));
 		}
 	}
 

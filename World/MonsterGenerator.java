@@ -10,6 +10,7 @@
 package Reika.VoidMonster.World;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +24,7 @@ import net.minecraftforge.common.MinecraftForge;
 import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry.TickHandler;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry.TickType;
+import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
 import Reika.DragonAPI.Libraries.ReikaPlayerAPI;
 import Reika.DragonAPI.ModInteract.ItemHandlers.ExtraUtilsHandler;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
@@ -33,6 +35,8 @@ public class MonsterGenerator implements TickHandler {
 	public static final MonsterGenerator instance = new MonsterGenerator();
 
 	private final Random rand = new Random();
+
+	private final HashSet<Integer> APIBans = new HashSet();
 	private final HashSet<Integer> bannedDimensions = new HashSet();
 
 	private MonsterGenerator() {
@@ -108,16 +112,21 @@ public class MonsterGenerator implements TickHandler {
 		return "Void Monster";
 	}
 
-	public void banDimensions(ArrayList<Integer> dimensions) {
+	public void banDimensions(Collection<Integer> dimensions) {
 		for (int id : dimensions) {
 			this.banDimension(id);
 		}
 	}
 
+	public void banDimensionAPI(int id) {
+		this.banDimension(id);
+		APIBans.add(id);
+	}
+
 	public void banDimension(int id) {
 		bannedDimensions.add(id);/*
 		if (this.isHardcodedAllowed(id))
-			VoidMonster.logger.log("Blacklist reqest for dimension ID "+id+", but this dimension may not be blacklisted.");
+			VoidMonster.logger.log("Blacklist request for dimension ID "+id+", but this dimension may not be blacklisted.");
 		else
 			VoidMonster.logger.log("Dimension ID "+id+" blacklisted for monster spawn.");*/
 	}
@@ -130,6 +139,13 @@ public class MonsterGenerator implements TickHandler {
 		if (ModList.EXTRAUTILS.isLoaded() && id == ExtraUtilsHandler.getInstance().darkID)
 			return true;
 		return false;
+	}
+
+	public void loadConfig(SimpleConfig config) {
+		bannedDimensions.clear();
+		ArrayList<Integer> dimensions = config.getIntList("Control Setup", "Banned Dimensions", 1, -112);
+		this.banDimensions(dimensions);
+		this.banDimensions(APIBans);
 	}
 
 }
