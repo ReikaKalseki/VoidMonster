@@ -18,8 +18,8 @@ public class DimensionAPI {
 		AmbientSoundGenerator.instance.blacklistDimension(id);
 	}
 
-	public static void blacklistDimensionForSpawning(int id) {
-		MonsterGenerator.instance.banDimensionAPI(id);
+	public static void setDimensionRuleForSpawning(int id, boolean allow) {
+		MonsterGenerator.instance.setDimensionRuleAPI(id, allow);
 	}
 
 }

@@ -9,6 +9,7 @@
  ******************************************************************************/
 package Reika.VoidMonster;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -156,8 +157,8 @@ public class VoidMonster extends DragonAPIMod {
 		this.finishTiming();
 	}
 
-	public static boolean blacklistedIn(World world) {
-		return MonsterGenerator.instance.isDimensionBanned(world);
+	public static boolean allowedIn(World world) {
+		return MonsterGenerator.instance.isDimensionAllowed(world);
 	}
 
 	public int getMonsterSoundDelay() {
@@ -215,5 +216,10 @@ public class VoidMonster extends DragonAPIMod {
 	@Override
 	public ModLogger getModLogger() {
 		return logger;
+	}
+
+	@Override
+	public File getConfigFolder() {
+		return config.getConfigFolder();
 	}
 }

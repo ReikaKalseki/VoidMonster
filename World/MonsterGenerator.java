@@ -12,7 +12,7 @@ package Reika.VoidMonster.World;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -36,8 +36,8 @@ public class MonsterGenerator implements TickHandler {
 
 	private final Random rand = new Random();
 
-	private final HashSet<Integer> APIBans = new HashSet();
-	private final HashSet<Integer> bannedDimensions = new HashSet();
+	private final HashMap<Integer, Boolean> APIRules = new HashMap();
+	private final HashMap<Integer, Boolean> spawnRules = new HashMap();
 
 	private MonsterGenerator() {
 		MinecraftForge.EVENT_BUS.register(this);
@@ -90,11 +90,12 @@ public class MonsterGenerator implements TickHandler {
 			}
 		}
 
-		return this.isHardcodedAllowed(world.provider.dimensionId) || !this.isDimensionBanned(world);
+		return this.isHardcodedAllowed(world.provider.dimensionId) || this.isDimensionAllowed(world);
 	}
 
-	public boolean isDimensionBanned(World world) {
-		return bannedDimensions.contains(world.provider.dimensionId);
+	public boolean isDimensionAllowed(World world) {
+		Boolean get = spawnRules.get(world.provider.dimensionId);
+		return get == null || get.booleanValue();
 	}
 
 	@Override
@@ -112,23 +113,25 @@ public class MonsterGenerator implements TickHandler {
 		return "Void Monster";
 	}
 
-	public void banDimensions(Collection<Integer> dimensions) {
+	public void setDimensions(Collection<Integer> dimensions, boolean allow) {
 		for (int id : dimensions) {
-			this.banDimension(id);
+			this.setDimension(id, allow);
 		}
 	}
 
-	public void banDimensionAPI(int id) {
-		this.banDimension(id);
-		APIBans.add(id);
+	public void setDimensions(HashMap<Integer, Boolean> dimensions) {
+		for (int id : dimensions.keySet()) {
+			this.setDimension(id, dimensions.get(id));
+		}
 	}
 
-	public void banDimension(int id) {
-		bannedDimensions.add(id);/*
-		if (this.isHardcodedAllowed(id))
-			VoidMonster.logger.log("Blacklist request for dimension ID "+id+", but this dimension may not be blacklisted.");
-		else
-			VoidMonster.logger.log("Dimension ID "+id+" blacklisted for monster spawn.");*/
+	public void setDimensionRuleAPI(int id, boolean allow) {
+		this.setDimension(id, allow);
+		APIRules.put(id, allow);
+	}
+
+	public void setDimension(int id, boolean allow) {
+		spawnRules.put(id, allow);
 	}
 
 	private boolean isHardcodedAllowed(int id) {
@@ -142,10 +145,11 @@ public class MonsterGenerator implements TickHandler {
 	}
 
 	public void loadConfig(SimpleConfig config) {
-		bannedDimensions.clear();
+		spawnRules.clear();
 		ArrayList<Integer> dimensions = config.getIntList("Control Setup", "Banned Dimensions", 1, -112);
-		this.banDimensions(dimensions);
-		this.banDimensions(APIBans);
+		boolean allow = config.getBoolean("Control Setup", "Dimension list is actually whitelist", false);
+		this.setDimensions(dimensions, allow);
+		this.setDimensions(APIRules);
 	}
 
 }

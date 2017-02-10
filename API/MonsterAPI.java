@@ -24,7 +24,7 @@ public class MonsterAPI {
 		Class m = null;
 		Method a = null;
 		try {
-			m = Class.forName("Reika.VoidMonster.EntityVoidMonster");
+			m = Class.forName("Reika.VoidMonster.VoidMonsterDrops");
 			a = m.getMethod("addDrop", ItemStack.class, int.class, int.class);
 		}
 		catch (Exception e) {

@@ -9,19 +9,14 @@
  ******************************************************************************/
 package Reika.VoidMonster.Entity;
 
-import java.util.ArrayList;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
@@ -32,19 +27,14 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.BlockFluidBase;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import Reika.DragonAPI.ModList;
-import Reika.DragonAPI.Instantiable.ItemDrop;
-import Reika.DragonAPI.Libraries.ReikaEnchantmentHelper;
 import Reika.DragonAPI.Libraries.IO.ReikaSoundHelper;
 import Reika.DragonAPI.Libraries.MathSci.ReikaMathLibrary;
-import Reika.DragonAPI.Libraries.Registry.ReikaItemHelper;
 import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
 import Reika.DragonAPI.ModInteract.ItemHandlers.ThaumItemHelper;
 import Reika.RotaryCraft.API.Interfaces.RadarJammer;
 import Reika.VoidMonster.VoidMonster;
+import Reika.VoidMonster.VoidMonsterDrops;
 
 public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 
@@ -55,8 +45,6 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	private int hitCooldown;
 	private int attackCooldown;
 	private int healTime;
-
-	private static final ArrayList<ItemDrop> drops = new ArrayList();
 
 	public EntityVoidMonster(World world) {
 		super(world);
@@ -85,14 +73,14 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(16.0D*f);
 	}
 
-	private float getDifficulty() {
+	public float getDifficulty() {
 		return VoidMonster.instance.getMonsterDifficulty();
 	}
 
 	@Override
 	public void onUpdate()
 	{
-		if (VoidMonster.blacklistedIn(worldObj)) {
+		if (!VoidMonster.allowedIn(worldObj)) {
 			this.setDead();
 			return;
 		}
@@ -120,6 +108,8 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 			posY = -10;
 		motionY = 0;
 
+		float f = this.getDifficulty();
+
 		entityToAttack = worldObj.getClosestPlayerToEntity(this, -1);
 		if (entityToAttack != null && hitCooldown == 0) {
 			double dx = posX-entityToAttack.posX;
@@ -127,9 +117,9 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 			double dz = posZ-entityToAttack.posZ;
 			double dist = ReikaMathLibrary.py3d(dx, dy, dz);
 			dist = Math.max(1, dist);
-			motionX = -dx/dist/16D;
-			motionY = -dy/dist/16D;
-			motionZ = -dz/dist/16D;
+			motionX = -dx/dist/16D*f;
+			motionY = -dy/dist/16D*f;
+			motionZ = -dz/dist/16D*f;
 			velocityChanged = true;
 		}
 
@@ -141,10 +131,10 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		if (!worldObj.isRemote) {
 			if (this.isHealing()) {
 				healTime--;
-				this.heal(0.25F*this.getDifficulty());
+				this.heal(0.25F*f);
 			}
 			else if (this.isAtLessHealth()) {
-				if (rand.nextInt((int)(80/this.getDifficulty())) == 0)
+				if (rand.nextInt((int)(80/f)) == 0)
 					healTime = 40;
 			}
 			dataWatcher.updateObject(31, healTime);
@@ -274,85 +264,10 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		return "mob.wither.death";
 	}
 
-	static {
-		addDrop(Items.diamond, 2, 8);
-		addDrop(Items.ghast_tear);
-		addDrop(Items.speckled_melon, 2, 5);
-		addDrop(Items.emerald, 2, 6);
-		addDrop(Items.ender_pearl, 1, 3);
-		addDrop(Items.ender_eye, 1, 3);
-		addDrop(Items.fire_charge, 2, 8);
-		addDrop(Items.nether_wart, 8, 22);
-		addDrop(Items.nether_star, 1, 2);
-		addDrop(Blocks.obsidian, 6, 16);
-		addDrop(Items.gunpowder, 8, 12);
-	}
-
-	private static void addDrop(Item i) {
-		addDrop(i, 1, 1);
-	}
-
-	private static void addDrop(Item i, int min, int max) {
-		addDrop(new ItemStack(i), min, max);
-	}
-
-	private static void addDrop(Block b) {
-		addDrop(b, 1, 1);
-	}
-
-	private static void addDrop(Block b, int min, int max) {
-		addDrop(new ItemStack(b), min, max);
-	}
-
-	private static void addDrop(ItemStack is) {
-		addDrop(is, 1, 1);
-	}
-
-	public static void addDrop(ItemStack is, int min, int max) {
-		ItemDrop it = new ItemDrop(is, min, max);
-		if (!drops.contains(it))
-			drops.add(it);
-		VoidMonster.instance.getModLogger().log("Adding monster drop "+is.getDisplayName());
-	}
-
-	private static void addDrop(ItemStack is, Enchantment e, int level) {
-		ItemDrop it = new ItemDrop(is, 1, 1);
-		it.enchant(e, level);
-		if (!drops.contains(it))
-			drops.add(it);
-		VoidMonster.instance.getModLogger().log("Adding monster drop "+is.getDisplayName()+", enchanted with "+e.getTranslatedName(level));
-	}
-
-	private static void addDrop(ItemStack is, int min, int max, Enchantment e, int level) {
-		ItemDrop it = new ItemDrop(is, min, max);
-		it.enchant(e, level);
-		if (!drops.contains(it))
-			drops.add(it);
-		VoidMonster.instance.getModLogger().log("Adding monster drop "+is.getDisplayName()+", enchanted with "+e.getName()+" "+level);
-	}
-
 	@Override
-	protected void dropFewItems(boolean par1, int par2)
-	{
-		for (int i = 0; i < drops.size(); i++) {
-			ItemDrop it = drops.get(i);
-			it.drop(this);
-		}
-		this.dropEnchantBooks();
+	protected void dropFewItems(boolean par1, int par2) {
+		VoidMonsterDrops.doDrops(this);
 		ReikaWorldHelper.splitAndSpawnXP(worldObj, posX, posY, posZ, experienceValue);
-	}
-
-	private void dropEnchantBooks() {
-		ArrayList<ImmutablePair<Enchantment, Integer>> li = new ArrayList();
-		int n = 1+2*MathHelper.ceiling_float_int(Math.max(1, 1+this.getDifficulty()));
-		for (int i = 0; i < n; i++) {
-			Enchantment e = ReikaEnchantmentHelper.getRandomEnchantment(null, false);
-			int l = 1+rand.nextInt(e.getMaxLevel());
-			li.add(new ImmutablePair(e, l));
-		}
-		for (ImmutablePair<Enchantment, Integer> p : li) {
-			ReikaItemHelper.dropItem(worldObj, posX, posY+0.25, posZ, ReikaEnchantmentHelper.getEnchantedBook(p.left, p.right));
-		}
 	}
 
 	@Override
