@@ -48,7 +48,7 @@ import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.EntityRegistry;
 
-@Mod( modid = "VoidMonster", name="Void Monster", certificateFingerprint = "@GET_FINGERPRINT@", dependencies="required-after:DragonAPI;before:Morph")
+@Mod( modid = "VoidMonster", name="Void Monster", version = "v@MAJOR_VERSION@@MINOR_VERSION@", certificateFingerprint = "@GET_FINGERPRINT@", dependencies="required-after:DragonAPI;before:Morph")
 public class VoidMonster extends DragonAPIMod {
 
 	@Instance("VoidMonster")

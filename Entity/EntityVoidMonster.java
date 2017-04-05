@@ -108,6 +108,9 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 			posY = -10;
 		motionY = 0;
 
+		rotationPitch = rotationYaw = rotationYawHead = renderYawOffset = 0;
+		prevRotationPitch = prevRotationYaw = prevRotationYawHead = prevRenderYawOffset = 0;
+
 		float f = this.getDifficulty();
 
 		entityToAttack = worldObj.getClosestPlayerToEntity(this, -1);
@@ -117,9 +120,9 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 			double dz = posZ-entityToAttack.posZ;
 			double dist = ReikaMathLibrary.py3d(dx, dy, dz);
 			dist = Math.max(1, dist);
-			motionX = -dx/dist/16D*f;
-			motionY = -dy/dist/16D*f;
-			motionZ = -dz/dist/16D*f;
+			motionX = -dx/dist/16D*f*2;
+			motionY = -dy/dist/16D*f*6;
+			motionZ = -dz/dist/16D*f*2;
 			velocityChanged = true;
 		}
 

@@ -11,14 +11,20 @@ package Reika.VoidMonster.Entity;
 
 import java.util.HashMap;
 
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderLiving;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 
+import Reika.DragonAPI.Instantiable.RayTracer;
+import Reika.DragonAPI.Libraries.IO.ReikaTextureHelper;
 import Reika.DragonAPI.Libraries.Java.ReikaGLHelper.BlendMode;
+import Reika.DragonAPI.Libraries.MathSci.ReikaPhysicsHelper;
+import Reika.VoidMonster.VoidMonster;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -28,15 +34,13 @@ public class RenderVoidMonster extends RenderLiving {
 	private final HashMap<String, ResourceLocation> map = new HashMap();
 	private static final ResourceLocation enderCrystalTextures = new ResourceLocation("textures/entity/endercrystal/endercrystal.png");
 	private static final ResourceLocation armoredCreeperTextures = new ResourceLocation("textures/entity/creeper/creeper_armor.png");
+	private static final RayTracer flareLOS = RayTracer.getVisualLOS();
 
 	public RenderVoidMonster()
 	{
 		super(new ModelVoidMonster(), 0.5F);
 	}
 
-	/**
-	 * Pre-Renders the VoidMonster.
-	 */
 	protected void preRenderVoidMonster(EntityVoidMonster ev, float par2)
 	{
 		float rot = ev.innerRotation + par2;
@@ -72,8 +76,60 @@ public class RenderVoidMonster extends RenderLiving {
 
 		}
 
+		this.renderFlare(ev, par2);
+
 		GL11.glPopAttrib();
 		GL11.glPopMatrix();
+	}
+
+	private void renderFlare(EntityVoidMonster ev, float par2) {
+		double tick = (ev.ticksExisted+par2)/1D;
+		int idx = (int)(tick%32);
+		flareLOS.setOrigins(ev.posX, ev.posY, ev.posZ, RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
+		if (flareLOS.isClearLineOfSight(ev.worldObj)) {
+			GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+			GL11.glPushMatrix();
+
+			GL11.glDisable(GL11.GL_LIGHTING);
+			GL11.glEnable(GL11.GL_BLEND);
+			BlendMode.DEFAULT.apply();
+			GL11.glDisable(GL11.GL_ALPHA_TEST);
+			GL11.glDisable(GL11.GL_DEPTH_TEST);
+			GL11.glDisable(GL11.GL_CULL_FACE);
+
+			GL11.glTranslated(0, 0.8, 0);
+
+			if (!ev.isDead) {
+				RenderManager rm = RenderManager.instance;
+				double dx = ev.posX-RenderManager.renderPosX;
+				double dy = ev.posY-RenderManager.renderPosY;
+				double dz = ev.posZ-RenderManager.renderPosZ;
+				double[] angs = ReikaPhysicsHelper.cartesianToPolar(dx, dy, dz);
+				GL11.glRotated(-angs[2]+35*0, 0, 1, 0);
+				GL11.glRotated(90-angs[1]+10*0, 1, 0, 0);
+			}
+
+			GL11.glTranslated(-0.125, 0, 0);
+
+			double u = (idx%8)/8D;
+			double v = (idx/8)/4D;
+			double du = u+1/8D;
+			double dv = v+1/4D;
+
+			ReikaTextureHelper.bindTexture(VoidMonster.class, "flare.png");
+
+			Tessellator v5 = Tessellator.instance;
+			v5.startDrawingQuads();
+			double s = 2.125;
+			v5.addVertexWithUV(-s, s, 0, u, dv);
+			v5.addVertexWithUV(s, s, 0, du, dv);
+			v5.addVertexWithUV(s, -s, 0, du, v);
+			v5.addVertexWithUV(-s, -s, 0, u, v);
+			v5.draw();
+
+			GL11.glPopMatrix();
+			GL11.glPopAttrib();
+		}
 	}
 
 	/**
