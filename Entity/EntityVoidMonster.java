@@ -9,14 +9,16 @@
  ******************************************************************************/
 package Reika.VoidMonster.Entity;
 
+import java.util.HashSet;
+
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
@@ -26,15 +28,20 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.BlockFluidBase;
 import Reika.DragonAPI.ModList;
+import Reika.DragonAPI.ASM.DependentMethodStripper.ModDependent;
+import Reika.DragonAPI.Instantiable.RayTracer;
+import Reika.DragonAPI.Libraries.ReikaEntityHelper;
 import Reika.DragonAPI.Libraries.IO.ReikaSoundHelper;
 import Reika.DragonAPI.Libraries.MathSci.ReikaMathLibrary;
+import Reika.DragonAPI.Libraries.World.ReikaBlockHelper;
 import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
 import Reika.DragonAPI.ModInteract.ItemHandlers.ThaumItemHelper;
 import Reika.RotaryCraft.API.Interfaces.RadarJammer;
 import Reika.VoidMonster.VoidMonster;
+import Reika.VoidMonster.VoidMonsterDamage;
 import Reika.VoidMonster.VoidMonsterDrops;
+import WayofTime.alchemicalWizardry.api.soulNetwork.SoulNetworkHandler;
 
 public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 
@@ -46,6 +53,8 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	private int attackCooldown;
 	private int healTime;
 
+	private static final RayTracer LOS = RayTracer.getVisualLOS();
+
 	public EntityVoidMonster(World world) {
 		super(world);
 		experienceValue = 20000;
@@ -54,7 +63,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		this.setSize(3, 3);
 
 		isImmuneToFire = true;
-		ignoreFrustumCheck = true;
+		//ignoreFrustumCheck = true;
 	}
 
 	@Override
@@ -115,15 +124,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 
 		entityToAttack = worldObj.getClosestPlayerToEntity(this, -1);
 		if (entityToAttack != null && hitCooldown == 0) {
-			double dx = posX-entityToAttack.posX;
-			double dy = posY-entityToAttack.posY-entityToAttack.getEyeHeight();
-			double dz = posZ-entityToAttack.posZ;
-			double dist = ReikaMathLibrary.py3d(dx, dy, dz);
-			dist = Math.max(1, dist);
-			motionX = -dx/dist/16D*f*2;
-			motionY = -dy/dist/16D*f*6;
-			motionZ = -dz/dist/16D*f*2;
-			velocityChanged = true;
+			this.moveToAttackEntity((EntityLivingBase)entityToAttack, f);
 		}
 
 		if (hitCooldown > 0)
@@ -143,10 +144,112 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 			dataWatcher.updateObject(31, healTime);
 		}
 
-		this.func_145771_j(posX, posY-4, posZ);
+		this.func_145771_j(posX, posY-0*4, posZ);
 
 		if (!worldObj.isRemote)
 			this.eatTorches();
+	}
+
+	private void moveToAttackEntity(EntityLivingBase e, float f) {
+		double dx = posX-entityToAttack.posX;
+		double dy = posY-(entityToAttack.posY-1.62*0);//entityToAttack.getEyeHeight();
+		double dz = posZ-entityToAttack.posZ;
+		double dist = ReikaMathLibrary.py3d(dx, dy, dz);
+		double d = Math.max(1, dist);
+		double f2 = 1.5;
+		if (dist >= 256) {
+			f2 = 14;
+		}
+		else if (dist >= 96) {
+			f2 = 4+(dist-96)/16D; //4 at 96, 6 at 128, 14 at 256
+		}
+		else if (dist >= 16) {
+			f2 = 1.5+(dist-16)/32D; //1.5 at 16, 4 at 96 (was 2 in all cases)
+		}
+		motionX = -dx/d/16D*f*f2;
+		motionY = -dy/d/16D*f*6;
+		motionZ = -dz/d/16D*f*f2;
+		velocityChanged = true;
+
+		if (dist <= 20) { //play sound
+
+			double dmg = 6;
+			if (dist <= dmg && this.canHurt(e) && this.canSee(e)) { //hurt
+				this.drainHealth(e, f, dist, dmg);
+			}
+		}
+	}
+
+	private boolean canSee(EntityLivingBase e) {
+		for (double dx = -2; dx <= 2; dx += 0.5) {
+			for (double dy = -2; dy <= 1; dy += 0.5) { //+1, not +2, to avoid 'leaking' through bedrock
+				for (double dz = -2; dz <= 2; dz += 0.5) {
+					LOS.setOrigins(posX+dx, posY+dy, posZ+dz, e.posX, e.posY, e.posZ);
+					if (LOS.isClearLineOfSight(worldObj))
+						return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean canHurt(EntityLivingBase e) {
+		if (e.isDead || e.getHealth() <= 0)
+			return false;
+		if (e instanceof EntityPlayer)
+			return !((EntityPlayer)e).capabilities.isCreativeMode;
+		return true;
+	}
+
+	private void drainHealth(EntityLivingBase e, float f, double dist, double damageDist) {
+		double fullDist = 2;
+		float fac = dist <= fullDist ? 1 : (float)(1-(fullDist-2)/(damageDist-dist));
+		float base = (float)this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+		float attack = base*fac/20F;
+		this.drainLPArmorOrHealth(e, attack);
+		this.onAttackEntity(e, f, fac);
+	}
+
+	private void drainLPArmorOrHealth(EntityLivingBase e, float attack) {
+		if (e instanceof EntityPlayer && ModList.BLOODMAGIC.isLoaded()) {
+			attack -= this.drainLP((EntityPlayer)e, attack);
+			if (attack <= 0)
+				return;
+		}
+		attack -= this.drainArmor(e, attack);
+		if (attack <= 0)
+			return;
+		ReikaEntityHelper.doSetHealthDamage(e, new VoidMonsterDamage(this), attack);
+	}
+
+	private int drainArmor(EntityLivingBase e, float attack) {
+		HashSet<Integer> slots = new HashSet();
+		int ret = 0;
+		for (int i = 1; i < 5; i++) {
+			ItemStack is = e.getEquipmentInSlot(i);
+			if (is != null && is.getItem() instanceof ItemArmor) {
+				slots.add(i);
+			}
+		}
+		if (!slots.isEmpty()) {
+			float perSlot = attack/slots.size();
+			//for (int slot : slots) {
+			//this.handleArmorSlot(e, slot, e.getEquipmentInSlot(slot), MathHelper.ceiling_float_int(perSlot));
+			//}
+			ret += ReikaEntityHelper.damageArmor(e, MathHelper.ceiling_float_int(perSlot));
+		}
+		return ret;
+	}
+
+	@ModDependent(ModList.BLOODMAGIC)
+	private int drainLP(EntityPlayer e, float attack) {
+		int cur = SoulNetworkHandler.getCurrentEssence(e.getCommandSenderName());
+		if (cur > 0) {
+			int rem = Math.min(MathHelper.ceiling_float_int(attack), cur);
+			SoulNetworkHandler.syphonFromNetwork(e.getCommandSenderName(), rem);
+			return rem;
+		}
+		return 0;
 	}
 
 	private void eatTorches() {
@@ -159,7 +262,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 					int z = MathHelper.floor_double(posZ)+k;
 					Block b = worldObj.getBlock(x, y, z);
 					if (b != Blocks.air) {
-						if (b != null && !(b instanceof BlockLiquid || b instanceof BlockFluidBase)) {
+						if (b != null && !ReikaBlockHelper.isLiquid(b)) {
 							int meta = worldObj.getBlockMetadata(x, y, z);
 							if (!b.hasTileEntity(meta) && b.getBlockHardness(worldObj, x, y, z) >= 0) {
 								if (b.getLightValue(worldObj, x, y, z) > 0) {
@@ -328,8 +431,10 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		}
 		if (posY < 0)
 			return false;
-		dmg = Math.min(dmg, cap);
-		boolean flag = super.attackEntityFrom(src, dmg);
+		float net = Math.min(dmg, cap);
+		float reflect = Math.min(15, (dmg-net)/8F*Math.min(8, (float)Math.pow(1.05, dmg-net)));
+		boolean flag = super.attackEntityFrom(src, net);
+		ep.attackEntityFrom(DamageSource.outOfWorld, reflect);
 		if (flag && this.getHealth() > 0) {
 			hitCooldown = 50;
 			this.teleport(e);
@@ -360,18 +465,32 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		return this.isAtLessHealth() && healTime > 0;
 	}
 
+	/*
 	@Override
 	public boolean attackEntityAsMob(Entity e)
 	{
 		boolean flag = super.attackEntityAsMob(e);
 		if (flag && e instanceof EntityLivingBase) {
-			((EntityLivingBase)e).addPotionEffect(new PotionEffect(Potion.blindness.id, 200, 0));
-			if (isNether) {
-				e.setFire(10);
-			}
-			this.heal(2*this.getDifficulty());
+			onAttackEntity(e, getDifficulty(), 1);
 		}
 		return flag;
+	}
+	 */
+
+	@Override
+	public boolean attackEntityAsMob(Entity e)
+	{
+		return false;
+	}
+
+	private void onAttackEntity(EntityLivingBase e, float f, float fac) {
+		if (fac > 0.5)
+			e.addPotionEffect(new PotionEffect(Potion.blindness.id, (int)(100*fac), 0));
+		if (isNether) {
+			if (fac > 0.25)
+				e.setFire((int)(10*fac));
+		}
+		this.heal(2*f);
 	}
 
 	@Override
@@ -412,12 +531,14 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	@Override
 	public AxisAlignedBB getCollisionBox(Entity entity)
 	{
+		/*
 		if (entity instanceof EntityLivingBase && !(entity instanceof EntityVoidMonster)) {
 			if (attackCooldown == 0) {
 				this.attackEntityAsMob(entity);
 				attackCooldown = 20;
 			}
 		}
+		 */
 		return null;//AxisAlignedBB.getBoundingBox(posX, posY, posZ, posX, posY, posZ).expand(3, 3, 3);
 	}
 

@@ -14,29 +14,23 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.world.World;
-import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
+import net.minecraftforge.common.MinecraftForge;
 import thaumcraft.api.aspects.Aspect;
 import Reika.DragonAPI.DragonAPICore;
 import Reika.DragonAPI.DragonOptions;
 import Reika.DragonAPI.ModList;
-import Reika.DragonAPI.ASM.DependentMethodStripper.ModDependent;
 import Reika.DragonAPI.Auxiliary.Trackers.CommandableUpdateChecker;
 import Reika.DragonAPI.Auxiliary.Trackers.DonatorController;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry;
 import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Base.DragonAPIMod.LoadProfiler.LoadPhase;
-import Reika.DragonAPI.Instantiable.Event.ConfigReloadEvent;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
 import Reika.DragonAPI.ModInteract.DeepInteract.ReikaThaumHelper;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import Reika.VoidMonster.World.AmbientSoundGenerator;
 import Reika.VoidMonster.World.MonsterGenerator;
-
-import com.xcompwiz.mystcraft.api.event.LinkEvent;
-
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -44,8 +38,6 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.EntityRegistry;
 
 @Mod( modid = "VoidMonster", name="Void Monster", version = "v@MAJOR_VERSION@@MINOR_VERSION@", certificateFingerprint = "@GET_FINGERPRINT@", dependencies="required-after:DragonAPI;before:Morph")
@@ -102,6 +94,8 @@ public class VoidMonster extends DragonAPIMod {
 		EntityRegistry.registerModEntity(EntityVoidMonster.class, "Void Monster", id, instance, 64, 20, true);
 
 		proxy.registerRenderers();
+
+		MinecraftForge.EVENT_BUS.register(VoidMonsterEvents.instance);
 
 		DonatorController.instance.registerMod(this, DonatorController.reikaURL);
 		this.finishTiming();
@@ -167,25 +161,6 @@ public class VoidMonster extends DragonAPIMod {
 
 	public float getMonsterDifficulty() {
 		return monsterDifficulty;
-	}
-
-	@SubscribeEvent
-	public void reloadConfig(ConfigReloadEvent d) {
-		MonsterGenerator.instance.loadConfig(config);
-	}
-
-	@SubscribeEvent
-	@ModDependent(ModList.MYSTCRAFT)
-	public void noLinking(LinkEvent.LinkEventAllow evt) {
-		if (evt.entity instanceof EntityVoidMonster)
-			evt.setCanceled(true);
-	}
-
-	@SubscribeEvent
-	public void disallowDespawn(AllowDespawn d) {
-		EntityLivingBase e = d.entityLiving;
-		if (e instanceof EntityVoidMonster)
-			d.setResult(Result.DENY);
 	}
 
 	@Override
