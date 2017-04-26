@@ -174,7 +174,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		if (dist <= 20) { //play sound
 
 			double dmg = 6;
-			if (dist <= dmg && this.canHurt(e) && this.canSee(e)) { //hurt
+			if (!worldObj.isRemote && dist <= dmg && this.canHurt(e) && this.canSee(e)) { //hurt
 				this.drainHealth(e, f, dist, dmg);
 			}
 		}
