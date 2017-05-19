@@ -74,6 +74,8 @@ public class VoidMonster extends DragonAPIMod {
 
 		MonsterGenerator.instance.loadConfig(config);
 
+		proxy.registerSounds();
+
 		monsterSoundDelay = Math.max(0, Math.min(1200, VoidMonster.config.getInteger("Control Setup", "Sound Interval in Ticks", 80)));
 
 		this.basicSetup(evt);

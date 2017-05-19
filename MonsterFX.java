@@ -47,8 +47,7 @@ public class MonsterFX {
 
 	public static void onRender(EntityVoidMonster ev, float par2) {
 		if (ReikaEntityHelper.isInWorld(ev)) {
-			LOS.setOrigins(ev.posX, ev.posY, ev.posZ, RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
-			boolean los = LOS.isClearLineOfSight(ev.worldObj);
+			boolean los = clearLOS(ev);
 			if (!los) {
 				LOS.setOrigins(ev.posX, ev.posY+1, ev.posZ, RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
 				los = LOS.isClearLineOfSight(ev.worldObj);
@@ -63,6 +62,11 @@ public class MonsterFX {
 				monsterDist = ev.getDistance(RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
 			}
 		}
+	}
+
+	public static boolean clearLOS(EntityVoidMonster ev) {
+		LOS.setOrigins(ev.posX, ev.posY, ev.posZ, RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
+		return LOS.isClearLineOfSight(ev.worldObj);
 	}
 
 	public static void onRenderLoop() {

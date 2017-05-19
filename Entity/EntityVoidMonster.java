@@ -38,10 +38,13 @@ import Reika.DragonAPI.Libraries.World.ReikaBlockHelper;
 import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
 import Reika.DragonAPI.ModInteract.ItemHandlers.ThaumItemHelper;
 import Reika.RotaryCraft.API.Interfaces.RadarJammer;
+import Reika.VoidMonster.MonsterFX;
 import Reika.VoidMonster.VoidMonster;
 import Reika.VoidMonster.VoidMonsterDamage;
 import Reika.VoidMonster.VoidMonsterDrops;
 import WayofTime.alchemicalWizardry.api.soulNetwork.SoulNetworkHandler;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 
@@ -148,6 +151,31 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 
 		if (!worldObj.isRemote)
 			this.eatTorches();
+		else
+			this.playSounds();
+	}
+
+	@SideOnly(Side.CLIENT)
+	private void playSounds() {
+		if (MonsterFX.clearLOS(this)) {
+			/*
+			if (ticksExisted%8 == 0) {
+				ReikaSoundHelper.playClientSound(VoidClient.monsterAura, posX, posY, posZ, 1, f, true);
+			}
+			 */
+			int t3 = ticksExisted%64;
+			int t2 = t3%32;
+			int t = t2%16;
+			if (t == 0 || t == 5 || (t == 8 && t2 > 16 && t3 > 32)) {
+				float f = (float)(0.75F+0.13*Math.sin(ticksExisted/40D));
+				//ReikaJavaLibrary.pConsole(f);
+				ReikaSoundHelper.playClientSound("mob.wither.spawn", posX, posY, posZ, 0.8F, f, true);
+				ReikaSoundHelper.playClientSound("note.bd", posX, posY, posZ, 1, 0.5F, true);
+			}
+			if (t == 3 || t == 8 || t == 13) {
+				ReikaSoundHelper.playClientSound("note.bassattack", posX, posY, posZ, 0.5F, 0.5F+rand.nextFloat()*0.25F, true);
+			}
+		}
 	}
 
 	private void moveToAttackEntity(EntityLivingBase e, float f) {
