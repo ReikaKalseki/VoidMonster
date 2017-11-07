@@ -13,7 +13,11 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import thaumcraft.api.aspects.Aspect;
@@ -25,6 +29,8 @@ import Reika.DragonAPI.Auxiliary.Trackers.DonatorController;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry;
 import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Base.DragonAPIMod.LoadProfiler.LoadPhase;
+import Reika.DragonAPI.Instantiable.Data.Maps.MultiMap;
+import Reika.DragonAPI.Instantiable.Data.Maps.MultiMap.HashSetFactory;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
 import Reika.DragonAPI.ModInteract.DeepInteract.ReikaThaumHelper;
@@ -53,6 +59,8 @@ public class VoidMonster extends DragonAPIMod {
 
 	public static final SimpleConfig config = new SimpleConfig(instance);
 
+	private static final MultiMap<Integer, Integer> monsterList = new MultiMap(new HashSetFactory());
+
 	private int monsterSoundDelay;
 	private float monsterDifficulty;
 
@@ -69,6 +77,8 @@ public class VoidMonster extends DragonAPIMod {
 		config.loadSubfolderedConfigFile(evt);
 		config.loadDataFromFile(evt);
 		config.finishReading();
+
+		//ConfigMatcher.instance.addConfigList(this, config);
 
 		monsterDifficulty = config.getFloat("Control Setup", "Void Monster Difficulty Factor", 1F);
 
@@ -122,6 +132,7 @@ public class VoidMonster extends DragonAPIMod {
 			};
 			ReikaThaumHelper.addAspects(EntityVoidMonster.class, asp);
 		}
+
 		if (ModList.MINEFACTORY.isLoaded()) {
 			try {
 				Class c = Class.forName("powercrystals.minefactoryreloaded.MFRRegistry");
@@ -135,6 +146,7 @@ public class VoidMonster extends DragonAPIMod {
 				e.printStackTrace();
 			}
 		}
+
 		if (ModList.ENDERIO.isLoaded()) {
 			try {
 				Class c = Class.forName("crazypants.enderio.config.Config");
@@ -150,6 +162,25 @@ public class VoidMonster extends DragonAPIMod {
 				e.printStackTrace();
 			}
 		}
+
+		if (ModList.FORESTRY.isLoaded()) {
+			try {
+				VoidMonsterBee bee = new VoidMonsterBee();
+			}
+			catch (IncompatibleClassChangeError e) {
+				e.printStackTrace();
+				logger.logError("Could not add Forestry integration. Check your versions; if you are up-to-date with both mods, notify Reika.");
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				logger.logError("Could not add Forestry integration. Check your versions; if you are up-to-date with both mods, notify Reika.");
+			}
+			catch (LinkageError e) {
+				e.printStackTrace();
+				logger.logError("Could not add Forestry integration. Check your versions; if you are up-to-date with both mods, notify Reika.");
+			}
+		}
+
 		this.finishTiming();
 	}
 
@@ -198,5 +229,31 @@ public class VoidMonster extends DragonAPIMod {
 	@Override
 	public File getConfigFolder() {
 		return config.getConfigFolder();
+	}
+
+	public static void registerExistingMonster(EntityVoidMonster e) {
+		monsterList.addValue(e.worldObj.provider.dimensionId, e.getEntityId());
+	}
+
+	public static Collection<EntityVoidMonster> getCurrentMonsterList(World world) {
+		Iterator<Integer> it = monsterList.get(world.provider.dimensionId).iterator();
+		ArrayList<EntityVoidMonster> li = new ArrayList();
+		while (it.hasNext()) {
+			int id = it.next();
+			Entity e = world.getEntityByID(id);
+			if (e instanceof EntityVoidMonster)
+				li.add((EntityVoidMonster)e);
+			else
+				it.remove();
+		}
+		return li;
+
+		/*
+		 * for (Entity e : ((List<Entity>)world.loadedEntityList)) {
+			if (e instanceof EntityVoidMonster) {
+				return false;
+			}
+		}
+		 */
 	}
 }

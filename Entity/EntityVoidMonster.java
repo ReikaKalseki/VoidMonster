@@ -9,12 +9,18 @@
  ******************************************************************************/
 package Reika.VoidMonster.Entity;
 
+import io.netty.buffer.ByteBuf;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -28,33 +34,48 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import Reika.ChromatiCraft.Registry.ChromaIcons;
+import Reika.ChromatiCraft.Render.Particle.EntityBlurFX;
 import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.ASM.DependentMethodStripper.ModDependent;
 import Reika.DragonAPI.Instantiable.RayTracer;
+import Reika.DragonAPI.Interfaces.Entity.DestroyOnUnload;
 import Reika.DragonAPI.Libraries.ReikaEntityHelper;
 import Reika.DragonAPI.Libraries.IO.ReikaSoundHelper;
+import Reika.DragonAPI.Libraries.Java.ReikaRandomHelper;
 import Reika.DragonAPI.Libraries.MathSci.ReikaMathLibrary;
+import Reika.DragonAPI.Libraries.MathSci.ReikaPhysicsHelper;
 import Reika.DragonAPI.Libraries.World.ReikaBlockHelper;
 import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
+import Reika.DragonAPI.ModInteract.ItemHandlers.ExtraUtilsHandler;
 import Reika.DragonAPI.ModInteract.ItemHandlers.ThaumItemHelper;
 import Reika.RotaryCraft.API.Interfaces.RadarJammer;
+import Reika.VoidMonster.GhostMonsterDamage;
 import Reika.VoidMonster.MonsterFX;
 import Reika.VoidMonster.VoidMonster;
 import Reika.VoidMonster.VoidMonsterDamage;
 import Reika.VoidMonster.VoidMonsterDrops;
+import Reika.VoidMonster.API.NonTeleportingDamage;
+import Reika.VoidMonster.API.VoidMonsterHook;
+import Reika.VoidMonster.World.MonsterGenerator;
 import WayofTime.alchemicalWizardry.api.soulNetwork.SoulNetworkHandler;
+import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public final class EntityVoidMonster extends EntityMob implements RadarJammer {
+public final class EntityVoidMonster extends EntityMob implements RadarJammer, DestroyOnUnload, IEntityAdditionalSpawnData {
 
 	private boolean isNether;
+	private boolean isGhost;
 
 	public int innerRotation;
 
 	private int hitCooldown;
 	private int attackCooldown;
+	private int ghostTick;
 	private int healTime;
+
+	private final Collection<VoidMonsterHook> hooks = new ArrayList();
 
 	private static final RayTracer LOS = RayTracer.getVisualLOS();
 
@@ -69,16 +90,24 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		//ignoreFrustumCheck = true;
 	}
 
+	public EntityVoidMonster setNether() {
+		isNether = true;
+		return this;
+	}
+
+	public EntityVoidMonster setGhost() {
+		isGhost = true;
+		return this;
+	}
+
 	@Override
-	protected void entityInit()
-	{
+	protected void entityInit() {
 		super.entityInit();
 		dataWatcher.addObject(31, healTime);
 	}
 
 	@Override
-	protected void applyEntityAttributes()
-	{
+	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		float f = this.getDifficulty();
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(300.0D*f*f);
@@ -89,12 +118,23 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		return VoidMonster.instance.getMonsterDifficulty();
 	}
 
+	public void addHook(VoidMonsterHook h) {
+		hooks.add(h);
+	}
+
 	@Override
-	public void onUpdate()
-	{
+	public void onUpdate() {
 		if (!VoidMonster.allowedIn(worldObj)) {
 			this.setDead();
 			return;
+		}
+
+		VoidMonster.registerExistingMonster(this);
+
+		if (!worldObj.isRemote) {
+			for (VoidMonsterHook h : hooks) {
+				h.tick(this);
+			}
 		}
 
 		boolean flag = false;
@@ -109,6 +149,10 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		innerRotation++;
 		if (innerRotation >= 3600) {
 			innerRotation = 0;
+		}
+
+		if (worldObj.isRemote && ticksExisted%128 == 0) {
+			ReikaEntityHelper.verifyClientEntity(this);
 		}
 	}
 
@@ -140,7 +184,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 				healTime--;
 				this.heal(0.25F*f);
 			}
-			else if (this.isAtLessHealth()) {
+			else if (!isGhost && this.isAtLessHealth()) {
 				if (rand.nextInt((int)(80/f)) == 0)
 					healTime = 40;
 			}
@@ -149,15 +193,17 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 
 		this.func_145771_j(posX, posY-0*4, posZ);
 
-		if (!worldObj.isRemote)
-			this.eatTorches();
+		if (!worldObj.isRemote) {
+			if (!isGhost)
+				this.eatTorches();
+		}
 		else
 			this.playSounds();
 	}
 
 	@SideOnly(Side.CLIENT)
 	private void playSounds() {
-		if (MonsterFX.clearLOS(this)) {
+		if (!isGhost && MonsterFX.clearLOS(this)) {
 			/*
 			if (ticksExisted%8 == 0) {
 				ReikaSoundHelper.playClientSound(VoidClient.monsterAura, posX, posY, posZ, 1, f, true);
@@ -178,34 +224,64 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		}
 	}
 
-	private void moveToAttackEntity(EntityLivingBase e, float f) {
-		double dx = posX-entityToAttack.posX;
-		double dy = posY-(entityToAttack.posY-1.62*0);//entityToAttack.getEyeHeight();
-		double dz = posZ-entityToAttack.posZ;
-		double dist = ReikaMathLibrary.py3d(dx, dy, dz);
-		double d = Math.max(1, dist);
-		double f2 = 1.5;
-		if (dist >= 256) {
-			f2 = 14;
+	public void moveToAttackEntity(EntityLivingBase e, float f) {
+		double dist = this.moveTowards(e.posX, e.posY, e.posZ, f);
+
+		if (isGhost) {
+			if (!worldObj.isRemote) {
+				if (this.canSee(e) && ReikaEntityHelper.isLookingAt(e, this)) {
+					ghostTick++;
+					if (ghostTick >= 1200)
+						this.setDead();
+				}
+				if (dist < 4) {
+					motionX = motionY = motionZ = 0;
+					velocityChanged = true;
+				}
+			}
+			return;
 		}
-		else if (dist >= 96) {
-			f2 = 4+(dist-96)/16D; //4 at 96, 6 at 128, 14 at 256
-		}
-		else if (dist >= 16) {
-			f2 = 1.5+(dist-16)/32D; //1.5 at 16, 4 at 96 (was 2 in all cases)
-		}
-		motionX = -dx/d/16D*f*f2;
-		motionY = -dy/d/16D*f*6;
-		motionZ = -dz/d/16D*f*f2;
-		velocityChanged = true;
 
 		if (dist <= 20) { //play sound
-
 			double dmg = 6;
 			if (!worldObj.isRemote && dist <= dmg && this.canHurt(e) && this.canSee(e)) { //hurt
 				this.drainHealth(e, f, dist, dmg);
 			}
 		}
+	}
+
+	public double moveTowards(double x, double y, double z, double vel) {
+		double dx = posX-x;
+		double dy = posY-(y-1.62*0);//entityToAttack.getEyeHeight();
+		double dz = posZ-z;
+		double dist = ReikaMathLibrary.py3d(dx, dy, dz);
+
+
+		if (ModList.EXTRAUTILS.isLoaded() && ExtraUtilsHandler.getInstance().initializedProperly() && worldObj.provider.dimensionId == ExtraUtilsHandler.getInstance().darkID && (dist >= 200 || (posY >= 2 && posY < 80))) {
+			noClip = true;
+		}
+		else if (isGhost) {
+			noClip = (ticksExisted%200) < 100 && this.getDistanceSq(x, y, z) >= 64;
+		}
+
+		double d = Math.max(1, dist);
+		double f2 = 1.5;
+		double f3 = 0.9375;
+		if (dist >= 256) {
+			f2 = 12;
+		}
+		else if (dist >= 96) {
+			f2 = Math.min(12, 4+(dist-96)/16D); //4 at 96, 6 at 128, 12 at 256 minus a bit
+		}
+		else if (dist >= 16) {
+			f2 = 1.5+(dist-16)/32D; //1.5 at 16, 4 at 96 (was 2 in all cases)
+		}
+		motionX = -dx/d/16D*vel*f2*f3;
+		motionY = -dy/d/16D*vel*6*f3;
+		motionZ = -dz/d/16D*vel*f2*f3;
+		velocityChanged = true;
+
+		return dist;
 	}
 
 	private boolean canSee(EntityLivingBase e) {
@@ -311,23 +387,29 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		return worldObj.getClosestPlayerToEntity(this, 128);
 	}
 
-	public EntityVoidMonster setNether() {
-		isNether = true;
-		return this;
-	}
-
 	public boolean isNetherVoid() {
 		return isNether;
 	}
 
 	@Override
 	public boolean canBeCollidedWith() {
-		return true;
+		return !isGhost;
 	}
 
 	@Override
-	public boolean isPotionApplicable(PotionEffect pot)
-	{
+	public void addPotionEffect(PotionEffect p) {
+		if (this.isGhost() && p.getPotionID() == Potion.regeneration.id) {
+			this.doGhostDamage(null, p.getAmplifier(), 1);
+		}
+	}
+
+	public void doGhostDamage(EntityLivingBase src, int lvl, double f) {
+		float amt = (float)(50*Math.max(0.25, f)*Math.pow(3, lvl));
+		this.attackEntityFrom(new GhostMonsterDamage(src), amt);
+	}
+
+	@Override
+	public boolean isPotionApplicable(PotionEffect pot) {
 		return false;
 	}
 
@@ -339,15 +421,13 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	}
 
 	@Override
-	public void playLivingSound()
-	{
+	public void playLivingSound() {
 		for (int i = 0; i < 2; i++)
 			super.playLivingSound();
 	}
 
 	@Override
-	protected String getLivingSound()
-	{
+	protected String getLivingSound() {
 		switch(rand.nextInt(9)) {
 			case 0:
 				return "mob.enderdragon.growl";
@@ -381,43 +461,78 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	}
 
 	@Override
-	protected float getSoundPitch()
-	{
+	protected float getSoundPitch() {
 		return 0;
 	}
 
 	@Override
-	protected String getHurtSound()
-	{
+	protected String getHurtSound() {
 		return "mob.zombie.hurt";
 	}
 
 	@Override
-	protected String getDeathSound()
-	{
+	protected String getDeathSound() {
 		return "mob.wither.death";
 	}
 
 	@Override
-	protected void dropFewItems(boolean par1, int par2) {
-		VoidMonsterDrops.doDrops(this);
-		ReikaWorldHelper.splitAndSpawnXP(worldObj, posX, posY, posZ, experienceValue);
+	public void onDeath(DamageSource src) {
+		super.onDeath(src);
+
+		if (worldObj.isRemote) {
+			if (ModList.CHROMATICRAFT.isLoaded()) {
+				this.spawnDeathParticles();
+			}
+		}
+		else {
+			worldObj.addWeatherEffect(new EntityLightningBolt(worldObj, posX, posY, posZ));
+			MonsterGenerator.instance.addCooldown(this, 200);
+		}
+	}
+
+	@SideOnly(Side.CLIENT)
+	@ModDependent(ModList.CHROMATICRAFT)
+	private void spawnDeathParticles() {
+		for (int i = 0; i < 24; i++) {
+			float s = (float)ReikaRandomHelper.getRandomBetween(1.5, 5);
+			int l = ReikaRandomHelper.getRandomBetween(40, 200);
+			EntityBlurFX fx = new EntityBlurFX(worldObj, posX, posY, posZ).setColor(0x000000).setBasicBlend().setScale(s).setLife(l);
+			double v = ReikaRandomHelper.getRandomBetween(0.0625, 0.25);
+			double[] xyz = ReikaPhysicsHelper.polarToCartesian(v, 0, rand.nextDouble()*360);
+			fx.motionX = xyz[0];
+			fx.motionZ = xyz[2];
+			fx.setColliding().setIcon(ChromaIcons.FADE_BASICBLEND);
+			Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+		}
 	}
 
 	@Override
-	public void writeEntityToNBT(NBTTagCompound nbt)
-	{
+	protected void dropFewItems(boolean par1, int par2) {
+		if (!isGhost) {
+			VoidMonsterDrops.doDrops(this);
+			ReikaWorldHelper.splitAndSpawnXP(worldObj, posX, posY, posZ, experienceValue);
+		}
+	}
+
+	@Override
+	public void writeEntityToNBT(NBTTagCompound nbt) {
 		super.writeEntityToNBT(nbt);
 
 		nbt.setBoolean("nether", isNether);
+		nbt.setBoolean("ghost", isGhost);
+
+		nbt.setBoolean("isdead", isDead);
 	}
 
 	@Override
-	public void readEntityFromNBT(NBTTagCompound nbt)
-	{
+	public void readEntityFromNBT(NBTTagCompound nbt) {
 		super.readEntityFromNBT(nbt);
 
 		isNether = nbt.getBoolean("nether");
+		isGhost = nbt.getBoolean("ghost");
+
+		if (nbt.getBoolean("isdead"))
+			this.setDead();
 	}
 
 	@Override
@@ -432,26 +547,40 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 
 	@Override
 	public boolean attackEntityFrom(DamageSource src, float dmg) {
-		if (hitCooldown > 0)
-			return false;
-		if (src.isFireDamage() || src == DamageSource.fall || src == DamageSource.outOfWorld || src == DamageSource.inWall || src == DamageSource.drown)
-			return false;
-		Entity e = src.getEntity();
-		if (!(e instanceof EntityPlayer))
-			return false;
+		boolean ghostDamage = src instanceof GhostMonsterDamage;
+		boolean monsterDamage = src instanceof VoidMonsterDamage;
 		float cap = 20;
-		if (src.isMagicDamage() && dmg > 5000)
-			cap = 100;
-		cap /= this.getDifficulty();
-		EntityPlayer ep = (EntityPlayer)e;
-		ItemStack weapon = ep.getCurrentEquippedItem();
-		if (ModList.THAUMCRAFT.isLoaded()) {
-			if (ThaumItemHelper.isVoidMetalTool(weapon)) {
-				cap *= 2F;
+		if (monsterDamage) {
+			cap = 50;
+		}
+		else {
+			if (ghostDamage) {
+				cap = 50;
 			}
-			else if (ThaumItemHelper.isWarpingTool(weapon)) {
-				cap *= 1.5F;
+			else {
+				if (isGhost)
+					return false;
+				if (hitCooldown > 0)
+					return false;
+				if (src.isFireDamage() || src == DamageSource.fall || src == DamageSource.outOfWorld || src == DamageSource.inWall || src == DamageSource.drown)
+					return false;
+				Entity e = src.getEntity();
+				if (!(e instanceof EntityPlayer))
+					return false;
+				EntityPlayer ep = (EntityPlayer)e;
+				ItemStack weapon = ep.getCurrentEquippedItem();
+				if (ModList.THAUMCRAFT.isLoaded()) {
+					if (ThaumItemHelper.isVoidMetalTool(weapon)) {
+						cap *= 2F;
+					}
+					else if (ThaumItemHelper.isWarpingTool(weapon)) {
+						cap *= 1.5F;
+					}
+				}
 			}
+			if (src.isMagicDamage() && dmg > 5000)
+				cap = 100;
+			cap /= this.getDifficulty();
 		}
 		if (this.isHealing()) {
 			this.playSound("random.bowhit", 1, 1);
@@ -460,12 +589,14 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 		if (posY < 0)
 			return false;
 		float net = Math.min(dmg, cap);
-		float reflect = Math.min(15, (dmg-net)/8F*Math.min(8, (float)Math.pow(1.05, dmg-net)));
+		if (!ghostDamage && !monsterDamage) {
+			float reflect = Math.min(15, (dmg-net)/8F*Math.min(8, (float)Math.pow(1.05, dmg-net)));
+			src.getEntity().attackEntityFrom(DamageSource.outOfWorld, reflect);
+		}
 		boolean flag = super.attackEntityFrom(src, net);
-		ep.attackEntityFrom(DamageSource.outOfWorld, reflect);
-		if (flag && this.getHealth() > 0) {
+		if (flag && this.getHealth() > 0 && !ghostDamage && !monsterDamage && !(src instanceof NonTeleportingDamage)) {
 			hitCooldown = 50;
-			this.teleport(e);
+			this.teleport(src.getEntity());
 		}
 		return flag;
 	}
@@ -533,8 +664,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	}
 
 	@Override
-	public void setFire(int par1)
-	{
+	public void setFire(int par1) {
 
 	}
 
@@ -545,20 +675,17 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	}
 
 	@Override
-	public boolean isPushedByWater()
-	{
+	public boolean isPushedByWater() {
 		return false;
 	}
 
 	@Override
-	public float getShadowSize()
-	{
+	public float getShadowSize() {
 		return 0;
 	}
 
 	@Override
-	public AxisAlignedBB getCollisionBox(Entity entity)
-	{
+	public AxisAlignedBB getCollisionBox(Entity entity) {
 		/*
 		if (entity instanceof EntityLivingBase && !(entity instanceof EntityVoidMonster)) {
 			if (attackCooldown == 0) {
@@ -573,6 +700,27 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer {
 	@Override
 	public boolean jamRadar(World world, int radarX, int radarY, int radarZ) {
 		return true;
+	}
+
+	@Override
+	public void destroy() {
+		this.setDead();
+	}
+
+	@Override
+	public void writeSpawnData(ByteBuf buf) {
+		buf.writeBoolean(isNether);
+		buf.writeBoolean(isGhost);
+	}
+
+	@Override
+	public void readSpawnData(ByteBuf buf) {
+		isNether = buf.readBoolean();
+		isGhost = buf.readBoolean();
+	}
+
+	public boolean isGhost() {
+		return isGhost;
 	}
 
 }

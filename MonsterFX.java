@@ -16,6 +16,7 @@ import org.lwjgl.opengl.GL11;
 
 import Reika.DragonAPI.Instantiable.RayTracer;
 import Reika.DragonAPI.Libraries.ReikaEntityHelper;
+import Reika.DragonAPI.Libraries.IO.ReikaChatHelper;
 import Reika.DragonAPI.Libraries.IO.ReikaColorAPI;
 import Reika.DragonAPI.Libraries.IO.ReikaTextureHelper;
 import Reika.DragonAPI.Libraries.Java.ReikaGLHelper.BlendMode;
@@ -66,6 +67,13 @@ public class MonsterFX {
 
 	public static boolean clearLOS(EntityVoidMonster ev) {
 		LOS.setOrigins(ev.posX, ev.posY, ev.posZ, RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
+		if (LOS.getLength() > 400) {
+			VoidMonster.logger.logError("Found a clientside monster at distance "+LOS.getLength()+", which should never happen! E="+ev);
+			ReikaChatHelper.writeString("VOIDMONSTER: Clientside long-distance void monster detected. Check logs/console.");
+			if (LOS.getLength() >= 1000)
+				ev.setDead();
+			return false;
+		}
 		return LOS.isClearLineOfSight(ev.worldObj);
 	}
 

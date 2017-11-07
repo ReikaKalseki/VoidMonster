@@ -10,11 +10,13 @@
 package Reika.VoidMonster;
 
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.potion.Potion;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
 import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.ASM.DependentMethodStripper.ModDependent;
 import Reika.DragonAPI.Instantiable.Event.ConfigReloadEvent;
+import Reika.DragonAPI.Instantiable.Event.SplashPotionEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.BossColorEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.EntityRenderingLoopEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.FarClippingPlaneEvent;
@@ -41,7 +43,17 @@ public class VoidMonsterEvents {
 	}
 
 	@SubscribeEvent
-	public void reloadConfig(ConfigReloadEvent d) {
+	public void damageGhostMonsters(SplashPotionEvent evt) {
+		if (evt.entityLiving instanceof EntityVoidMonster && evt.potion.id == Potion.heal.id) {
+			if (((EntityVoidMonster)evt.entityLiving).isGhost()) {
+				((EntityVoidMonster)evt.entityLiving).doGhostDamage(evt.thrower, evt.potionAmplifier, evt.effectFactor);
+				evt.setCanceled(true);
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public void reloadConfig(ConfigReloadEvent evt) {
 		MonsterGenerator.instance.loadConfig(VoidMonster.config);
 	}
 
