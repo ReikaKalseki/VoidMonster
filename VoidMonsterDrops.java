@@ -14,6 +14,7 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -26,6 +27,7 @@ import Reika.DragonAPI.Instantiable.ItemDrop;
 import Reika.DragonAPI.Instantiable.IO.CustomRecipeList;
 import Reika.DragonAPI.Instantiable.IO.LuaBlock;
 import Reika.DragonAPI.Libraries.ReikaEnchantmentHelper;
+import Reika.DragonAPI.Libraries.ReikaEntityHelper;
 import Reika.DragonAPI.Libraries.Registry.ReikaItemHelper;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 
@@ -129,7 +131,8 @@ public class VoidMonsterDrops {
 	public static void doDrops(EntityVoidMonster e) {
 		for (int i = 0; i < drops.size(); i++) {
 			ItemDrop it = drops.get(i);
-			it.drop(e);
+			EntityItem ei = it.drop(e);
+			ReikaEntityHelper.setInvulnerable(ei, true);
 		}
 		dropEnchantedBooks(e);
 	}
