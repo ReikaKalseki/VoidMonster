@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -49,6 +51,7 @@ import Reika.DragonAPI.Libraries.World.ReikaBlockHelper;
 import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
 import Reika.DragonAPI.ModInteract.ItemHandlers.ExtraUtilsHandler;
 import Reika.DragonAPI.ModInteract.ItemHandlers.ThaumItemHelper;
+import Reika.DragonAPI.ModRegistry.InterfaceCache;
 import Reika.RotaryCraft.API.Interfaces.RadarJammer;
 import Reika.VoidMonster.GhostMonsterDamage;
 import Reika.VoidMonster.MonsterFX;
@@ -59,6 +62,10 @@ import Reika.VoidMonster.API.NonTeleportingDamage;
 import Reika.VoidMonster.API.VoidMonsterHook;
 import Reika.VoidMonster.World.MonsterGenerator;
 import WayofTime.alchemicalWizardry.api.soulNetwork.SoulNetworkHandler;
+import cofh.api.energy.IEnergyContainerItem;
+
+import com.google.common.base.Function;
+
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -76,6 +83,23 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 	private int healTime;
 
 	private final Collection<VoidMonsterHook> hooks = new ArrayList();
+
+	private static final Function<ItemStack, Boolean> fluxArmorEffect = new Function<ItemStack, Boolean>() {
+
+		@Override
+		@Nullable
+		public Boolean apply(@Nullable ItemStack input) {
+			if (input != null) {
+				if (InterfaceCache.RFENERGYITEM.instanceOf(input.getItem())) {
+					IEnergyContainerItem ie = (IEnergyContainerItem)input.getItem();
+					ie.extractEnergy(input, 100+ie.getEnergyStored(input)/5, false);
+					return true;
+				}
+			}
+			return false;
+		}
+
+	};
 
 	private static final RayTracer LOS = RayTracer.getVisualLOS();
 
@@ -340,7 +364,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 			//for (int slot : slots) {
 			//this.handleArmorSlot(e, slot, e.getEquipmentInSlot(slot), MathHelper.ceiling_float_int(perSlot));
 			//}
-			ret += ReikaEntityHelper.damageArmor(e, MathHelper.ceiling_float_int(perSlot));
+			ret += ReikaEntityHelper.damageArmor(e, MathHelper.ceiling_float_int(perSlot), fluxArmorEffect);
 		}
 		return ret;
 	}

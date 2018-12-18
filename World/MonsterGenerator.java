@@ -42,6 +42,8 @@ public class MonsterGenerator implements TickHandler {
 	private final HashMap<Integer, Boolean> spawnRules = new HashMap();
 	private final HashMap<Integer, Integer> monsterCooldown = new HashMap();
 
+	private boolean whitelist;
+
 	private boolean cachedLoadState = false;
 	private long cachedLoadTime = -1;
 
@@ -123,7 +125,7 @@ public class MonsterGenerator implements TickHandler {
 
 	public boolean isDimensionAllowed(World world) {
 		Boolean get = spawnRules.get(world.provider.dimensionId);
-		return get == null || get.booleanValue();
+		return (get == null && !whitelist) || get.booleanValue();
 	}
 
 	public void addCooldown(EntityVoidMonster e, int delay) {
@@ -181,8 +183,8 @@ public class MonsterGenerator implements TickHandler {
 	public void loadConfig(SimpleConfig config) {
 		spawnRules.clear();
 		ArrayList<Integer> dimensions = config.getIntList("Control Setup", "Banned Dimensions", 1, -112);
-		boolean allow = config.getBoolean("Control Setup", "Dimension list is actually whitelist", false);
-		this.setDimensions(dimensions, allow);
+		whitelist = config.getBoolean("Control Setup", "Dimension list is actually whitelist", false);
+		this.setDimensions(dimensions, whitelist);
 		this.setDimensions(APIRules);
 	}
 

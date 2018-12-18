@@ -30,7 +30,7 @@ import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry;
 import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Base.DragonAPIMod.LoadProfiler.LoadPhase;
 import Reika.DragonAPI.Instantiable.Data.Maps.MultiMap;
-import Reika.DragonAPI.Instantiable.Data.Maps.MultiMap.HashSetFactory;
+import Reika.DragonAPI.Instantiable.Data.Maps.MultiMap.ConcurrentHashSetFactory;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
 import Reika.DragonAPI.ModInteract.DeepInteract.ReikaThaumHelper;
@@ -59,7 +59,7 @@ public class VoidMonster extends DragonAPIMod {
 
 	public static final SimpleConfig config = new SimpleConfig(instance);
 
-	private static final MultiMap<Integer, Integer> monsterList = new MultiMap(new HashSetFactory());
+	private static final MultiMap<Integer, Integer> monsterList = new MultiMap(new ConcurrentHashSetFactory());
 
 	private int monsterSoundDelay;
 	private float monsterDifficulty;
