@@ -125,7 +125,7 @@ public class MonsterGenerator implements TickHandler {
 
 	public boolean isDimensionAllowed(World world) {
 		Boolean get = spawnRules.get(world.provider.dimensionId);
-		return (get == null && !whitelist) || get.booleanValue();
+		return (get == null && !whitelist) || (get != null && get.booleanValue());
 	}
 
 	public void addCooldown(EntityVoidMonster e, int delay) {
