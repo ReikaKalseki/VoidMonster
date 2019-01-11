@@ -18,6 +18,10 @@ public class DimensionAPI {
 		AmbientSoundGenerator.instance.blacklistDimension(id);
 	}
 
+	public static void blacklistBiomeForSounds(int id) {
+		AmbientSoundGenerator.instance.blacklistBiome(id);
+	}
+
 	public static void setDimensionRuleForSpawning(int id, boolean allow) {
 		MonsterGenerator.instance.setDimensionRuleAPI(id, allow);
 	}

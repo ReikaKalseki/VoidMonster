@@ -17,7 +17,6 @@ import org.lwjgl.opengl.GL11;
 import Reika.DragonAPI.Instantiable.RayTracer;
 import Reika.DragonAPI.Libraries.ReikaEntityHelper;
 import Reika.DragonAPI.Libraries.IO.ReikaChatHelper;
-import Reika.DragonAPI.Libraries.IO.ReikaColorAPI;
 import Reika.DragonAPI.Libraries.IO.ReikaTextureHelper;
 import Reika.DragonAPI.Libraries.Java.ReikaGLHelper.BlendMode;
 import Reika.DragonAPI.Libraries.MathSci.ReikaPhysicsHelper;
@@ -137,8 +136,8 @@ public class MonsterFX {
 	}
 	 */
 
-	public static int rampColor(int c, int original) {
-		return ReikaColorAPI.mixColors(c, original, monsterScreenFactor/*MathHelper.clamp_float(Minecraft.getMinecraft().entityRenderer.bossColorModifier, 0, 1)*/);
+	public static float getColorFactor() {
+		return monsterScreenFactor;
 	}
 
 	public static float rampFog(float original) {

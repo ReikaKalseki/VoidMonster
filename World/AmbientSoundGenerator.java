@@ -31,6 +31,7 @@ public class AmbientSoundGenerator implements TickHandler {
 	private final Random rand = new Random();
 
 	private final HashSet<Integer> bannedDimensions = new HashSet();
+	private final HashSet<Integer> bannedBiomes = new HashSet();
 
 	private AmbientSoundGenerator() {
 		MinecraftForge.EVENT_BUS.register(this);
@@ -50,6 +51,8 @@ public class AmbientSoundGenerator implements TickHandler {
 						if (world.canBlockSeeTheSky(x, y+1, z))
 							return;
 						if (world.getBlockLightValue(x, y+1, z) > 7)
+							return;
+						if (bannedBiomes.contains(world.getBiomeGenForCoords(x, z).biomeID))
 							return;
 						float volume = 2*(45-(float)ep.posY)/45F;
 						if (rand.nextInt(4) == 0) { //stack sounds
@@ -74,6 +77,10 @@ public class AmbientSoundGenerator implements TickHandler {
 
 	public void blacklistDimension(int id) {
 		bannedDimensions.add(id);
+	}
+
+	public void blacklistBiome(int id) {
+		bannedBiomes.add(id);
 	}
 
 	private boolean isHardcodedAllowed(int id) {

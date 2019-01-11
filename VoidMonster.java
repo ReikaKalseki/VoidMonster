@@ -63,6 +63,7 @@ public class VoidMonster extends DragonAPIMod {
 
 	private int monsterSoundDelay;
 	private float monsterDifficulty;
+	private float voidFogStrength;
 
 	@Override
 	@EventHandler
@@ -81,6 +82,7 @@ public class VoidMonster extends DragonAPIMod {
 		//ConfigMatcher.instance.addConfigList(this, config);
 
 		monsterDifficulty = config.getFloat("Control Setup", "Void Monster Difficulty Factor", 1F);
+		voidFogStrength = config.getFloat("Control Setup", "Void Fog Strength", 1F);
 
 		MonsterGenerator.instance.loadConfig(config);
 
@@ -194,6 +196,10 @@ public class VoidMonster extends DragonAPIMod {
 
 	public float getMonsterDifficulty() {
 		return monsterDifficulty;
+	}
+
+	public float getFogStrength() {
+		return voidFogStrength;
 	}
 
 	@Override

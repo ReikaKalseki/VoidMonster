@@ -74,13 +74,13 @@ public class VoidMonsterEvents {
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public void dynamicFog(FogDistanceEvent evt) {
-		evt.fogDistance = MonsterFX.rampFog(evt.fogDistance);
+		evt.fogDistance = Math.min(evt.fogDistance, Math.min(MonsterFX.rampFog(evt.fogDistance), VoidFogManager.getFogDistance()));
 	}
 
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public void dynamicFog(FarClippingPlaneEvent evt) {
-		evt.farClippingPlaneDistance = MonsterFX.rampFog(evt.farClippingPlaneDistance);
+		evt.farClippingPlaneDistance = Math.min(evt.farClippingPlaneDistance, Math.min(MonsterFX.rampFog(evt.farClippingPlaneDistance), VoidFogManager.getFogDistance()));
 	}
 
 	@SubscribeEvent
@@ -91,7 +91,10 @@ public class VoidMonsterEvents {
 		//}
 		int c0 = ReikaColorAPI.RGBtoHex((int)(evt.red*255), (int)(evt.green*255), (int)(evt.blue*255));
 		int c1 = ReikaColorAPI.GStoHex((int)(255*0.03125F*1.5F));
-		int c = MonsterFX.rampColor(c1, c0);//ReikaColorAPI.mixColors(c1, c0, MathHelper.clamp_float(Minecraft.getMinecraft().entityRenderer.bossColorModifier, 0, 1));
+
+		float mix = Math.max(VoidFogManager.getColorFactor(), MonsterFX.getColorFactor());
+		int c = ReikaColorAPI.mixColors(c1, c0, mix);
+
 		evt.red = ReikaColorAPI.getRed(c)/255F;
 		evt.green = ReikaColorAPI.getGreen(c)/255F;
 		evt.blue = ReikaColorAPI.getBlue(c)/255F;
@@ -116,7 +119,8 @@ public class VoidMonsterEvents {
 	public void dynamicFog(SkyColorEvent evt) {
 		//if (MonsterFX.isMonsterVisible()) {
 		//ReikaJavaLibrary.pConsole(Integer.toHexString(evt.color));
-		evt.color = MonsterFX.rampColor(0x101010, evt.color);
+		float mix = Math.max(VoidFogManager.getColorFactor(), MonsterFX.getColorFactor());
+		evt.color = ReikaColorAPI.mixColors(0x101010, evt.color, mix);
 		//}
 	}
 
