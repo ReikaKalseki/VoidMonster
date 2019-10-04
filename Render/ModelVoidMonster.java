@@ -7,7 +7,7 @@
  * Distribution of the software in any form is only allowed with
  * explicit, prior permission from the owner.
  ******************************************************************************/
-package Reika.VoidMonster.Entity;
+package Reika.VoidMonster.Render;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelDragon;

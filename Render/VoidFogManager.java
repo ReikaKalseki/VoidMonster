@@ -1,9 +1,12 @@
-package Reika.VoidMonster;
+package Reika.VoidMonster.Render;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.WorldType;
+
 import Reika.DragonAPI.Instantiable.Interpolation;
+import Reika.VoidMonster.VoidMonster;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -12,18 +15,19 @@ public class VoidFogManager {
 
 	private static final Interpolation fogLimit = new Interpolation(false);
 	private static final Interpolation colorMix = new Interpolation(false);
-	private static final double MINDIST = VoidMonster.instance.getFogStrength() <= 1 ? 12 : 12/VoidMonster.instance.getFogStrength();
+	private static final double MINDIST = VoidMonster.instance.getFogStrength() <= 1 ? 12 : Math.min(24, 12/Math.sqrt(VoidMonster.instance.getFogStrength()));
 	private static final int MAXY = 24;
 
 	static {
 		fogLimit.addPoint(0, MINDIST);
-		fogLimit.addPoint(4, 24);
-		fogLimit.addPoint(16, 32);
+		fogLimit.addPoint(4, 18);
+		fogLimit.addPoint(16, 24);
 		fogLimit.addPoint(MAXY, 512);
 
 		colorMix.addPoint(0, 1);
 		colorMix.addPoint(4, 1);
-		colorMix.addPoint(16, 0.5);
+		colorMix.addPoint(16, 0.25);
+		colorMix.addPoint(20, 0.5);
 		colorMix.addPoint(MAXY, 0);
 	}
 
@@ -33,10 +37,22 @@ public class VoidFogManager {
 			return Double.POSITIVE_INFINITY;
 		if (ep.worldObj.getWorldInfo().getTerrainType() == WorldType.FLAT)
 			return Double.POSITIVE_INFINITY;
-		float f = VoidMonster.instance.getFogStrength();
+		if (!VoidMonster.allowedIn(ep.worldObj))
+			return Double.POSITIVE_INFINITY;
+		double f = VoidMonster.instance.getFogStrength();
 		if (f <= 0)
 			return Double.POSITIVE_INFINITY;
-		double y = ep.posY/f;
+		double f2;
+		if (f < 1) {
+			f2 = Math.pow(f, 0.5);
+		}
+		else if (f > 1) {
+			f2 = f;
+		}
+		else {
+			f2 = 1;
+		}
+		double y = ep.posY/f2;
 		if (y < MAXY) {
 			return y;
 		}

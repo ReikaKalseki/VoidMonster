@@ -7,19 +7,20 @@
  * Distribution of the software in any form is only allowed with
  * explicit, prior permission from the owner.
  ******************************************************************************/
-package Reika.VoidMonster.Entity;
+package Reika.VoidMonster.Render;
 
 import java.util.HashMap;
+
+import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
 
-import org.lwjgl.opengl.GL11;
-
 import Reika.DragonAPI.Libraries.Java.ReikaGLHelper.BlendMode;
-import Reika.VoidMonster.MonsterFX;
+import Reika.VoidMonster.Entity.EntityVoidMonster;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 

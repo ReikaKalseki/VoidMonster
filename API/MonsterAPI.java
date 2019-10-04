@@ -1,8 +1,8 @@
 /*******************************************************************************
  * @author Reika Kalseki
- * 
+ *
  * Copyright 2017
- * 
+ *
  * All rights reserved.
  * Distribution of the software in any form is only allowed with
  * explicit, prior permission from the owner.
@@ -25,7 +25,7 @@ public class MonsterAPI {
 		Method a = null;
 		try {
 			m = Class.forName("Reika.VoidMonster.VoidMonsterDrops");
-			a = m.getMethod("addDrop", ItemStack.class, int.class, int.class);
+			a = m.getMethod("addDrop", ItemStack.class, int.class, int.class, double.class);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -35,8 +35,12 @@ public class MonsterAPI {
 	}
 
 	public static void addDrop(ItemStack is, int minDrops, int maxDrops) {
+		addDrop(is, minDrops, maxDrops, 0);
+	}
+
+	public static void addDrop(ItemStack is, int minDrops, int maxDrops, double requiredDifficulty) {
 		try {
-			add.invoke(null, is, minDrops, maxDrops);
+			add.invoke(null, is, minDrops, maxDrops, requiredDifficulty);
 		}
 		catch (Exception e) {
 			e.printStackTrace();

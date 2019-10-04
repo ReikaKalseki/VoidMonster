@@ -11,11 +11,13 @@ package Reika.VoidMonster;
 
 import net.minecraft.client.audio.SoundCategory;
 import net.minecraft.world.World;
+
 import Reika.DragonAPI.Instantiable.IO.SingleSound;
 import Reika.DragonAPI.Instantiable.IO.SoundLoader;
 import Reika.DragonAPI.Interfaces.Registry.SoundEnum;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
-import Reika.VoidMonster.Entity.RenderVoidMonster;
+import Reika.VoidMonster.Render.RenderVoidMonster;
+
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 

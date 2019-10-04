@@ -1,18 +1,19 @@
 /*******************************************************************************
  * @author Reika Kalseki
- * 
+ *
  * Copyright 2017
- * 
+ *
  * All rights reserved.
  * Distribution of the software in any form is only allowed with
  * explicit, prior permission from the owner.
  ******************************************************************************/
-package Reika.VoidMonster;
-
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.entity.RenderManager;
+package Reika.VoidMonster.Render;
 
 import org.lwjgl.opengl.GL11;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.RenderManager;
 
 import Reika.DragonAPI.Instantiable.RayTracer;
 import Reika.DragonAPI.Libraries.ReikaEntityHelper;
@@ -20,7 +21,9 @@ import Reika.DragonAPI.Libraries.IO.ReikaChatHelper;
 import Reika.DragonAPI.Libraries.IO.ReikaTextureHelper;
 import Reika.DragonAPI.Libraries.Java.ReikaGLHelper.BlendMode;
 import Reika.DragonAPI.Libraries.MathSci.ReikaPhysicsHelper;
+import Reika.VoidMonster.VoidMonster;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -76,8 +79,14 @@ public class MonsterFX {
 		return LOS.isClearLineOfSight(ev.worldObj);
 	}
 
-	public static void onRenderLoop() {
+	public static void onRenderLoop(int pass) {
 		monsterScreenFactor = Math.max(monsterScreenFactor-0.0125F, 0);
+		if (pass == 1) {
+			for (EntityVoidMonster ev : VoidMonster.getCurrentMonsterList(Minecraft.getMinecraft().theWorld))
+				VoidGrowthRenderer.instance.tickMonster(ev);
+			VoidGrowthRenderer.instance.renderAndTick(Minecraft.getMinecraft().theWorld);
+		}
+		//VoidGrowthRenderer.instance.tick();
 	}
 
 	private static void renderFlare(EntityVoidMonster ev, float par2) {

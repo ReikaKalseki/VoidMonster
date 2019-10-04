@@ -1,15 +1,16 @@
 /*******************************************************************************
  * @author Reika Kalseki
- * 
+ *
  * Copyright 2017
- * 
+ *
  * All rights reserved.
  * Distribution of the software in any form is only allowed with
  * explicit, prior permission from the owner.
  ******************************************************************************/
-package Reika.VoidMonster;
+package Reika.VoidMonster.Auxiliary;
 
 import net.minecraft.entity.Entity;
+
 import Reika.DragonAPI.Instantiable.CustomStringDamageSource;
 import Reika.DragonAPI.Libraries.Java.ReikaRandomHelper;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
