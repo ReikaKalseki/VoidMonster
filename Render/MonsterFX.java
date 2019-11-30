@@ -21,6 +21,7 @@ import Reika.DragonAPI.Libraries.IO.ReikaChatHelper;
 import Reika.DragonAPI.Libraries.IO.ReikaTextureHelper;
 import Reika.DragonAPI.Libraries.Java.ReikaGLHelper.BlendMode;
 import Reika.DragonAPI.Libraries.MathSci.ReikaPhysicsHelper;
+import Reika.VoidMonster.VoidClient;
 import Reika.VoidMonster.VoidMonster;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 
@@ -58,6 +59,8 @@ public class MonsterFX {
 
 			if (los) { //not isVisible, since may have multiple monsters, and flare is per-monster, but isVisible is global for things like fog
 				renderFlare(ev, par2);
+				VoidClient.getShader().setMatricesToCurrent();
+				VoidClient.getShader().setFocus(ev);
 				//BossStatus.hasColorModifier = true;
 				//lastMonsterRender = ev.worldObj.getTotalWorldTime();
 				monsterScreenFactor = Math.min(monsterScreenFactor+0.05F, 1);
@@ -81,6 +84,8 @@ public class MonsterFX {
 
 	public static void onRenderLoop(int pass) {
 		monsterScreenFactor = Math.max(monsterScreenFactor-0.0125F, 0);
+		VoidClient.getShader().setEnabled(monsterScreenFactor > 0);
+		VoidClient.getShader().setIntensity(monsterScreenFactor);
 		if (pass == 1) {
 			for (EntityVoidMonster ev : VoidMonster.getCurrentMonsterList(Minecraft.getMinecraft().theWorld))
 				VoidGrowthRenderer.instance.tickMonster(ev);

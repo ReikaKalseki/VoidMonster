@@ -38,6 +38,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 
 import Reika.ChromatiCraft.Registry.ChromaIcons;
 import Reika.ChromatiCraft.Render.Particle.EntityBlurFX;
@@ -64,6 +65,7 @@ import Reika.RotaryCraft.API.Interfaces.TargetEntity;
 import Reika.RotaryCraft.Items.ItemVoidMetalRailgunAmmo.VoidMetalRailGunAmmo;
 import Reika.VoidMonster.VoidMonster;
 import Reika.VoidMonster.API.NonTeleportingDamage;
+import Reika.VoidMonster.API.PlayerLookAtVoidMonsterEvent;
 import Reika.VoidMonster.API.VoidMonsterHook;
 import Reika.VoidMonster.Auxiliary.GhostMonsterDamage;
 import Reika.VoidMonster.Auxiliary.VoidMonsterBait;
@@ -315,8 +317,10 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 				EntityLivingBase e = (EntityLivingBase)t;
 				boolean LOS = this.canSee(e);
 				if (e instanceof EntityPlayer) {
-					if (dist < 60 && LOS && ModList.THAUMCRAFT.isLoaded() && ReikaEntityHelper.isLookingAt(e, this) && rand.nextInt(50) == 0) {
-						ReikaThaumHelper.addPlayerTempWarp((EntityPlayer)e, 1);
+					if (dist < 60 && LOS && ModList.THAUMCRAFT.isLoaded() && ReikaEntityHelper.isLookingAt(e, this)) {
+						MinecraftForge.EVENT_BUS.post(new PlayerLookAtVoidMonsterEvent((EntityPlayer)e, this));
+						if (rand.nextInt(50) == 0)
+							ReikaThaumHelper.addPlayerTempWarp((EntityPlayer)e, 1);
 					}
 				}
 
