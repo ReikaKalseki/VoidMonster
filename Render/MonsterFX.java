@@ -164,7 +164,8 @@ public class MonsterFX {
 		}
 		 */
 		//float fac = isMonsterVisible() ? MathHelper.clamp_float(Minecraft.getMinecraft().entityRenderer.bossColorModifier, 0, 1) : 0;
-		return getFogDistance()*monsterScreenFactor+(1-monsterScreenFactor)*original;
+		float f = monsterScreenFactor;///2F;
+		return getFogDistance()*f+(1-f)*original;
 	}
 
 }

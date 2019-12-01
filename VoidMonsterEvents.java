@@ -77,13 +77,13 @@ public class VoidMonsterEvents {
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public void dynamicFog(FogDistanceEvent evt) {
-		evt.fogDistance = Math.min(evt.fogDistance, Math.min(MonsterFX.rampFog(evt.fogDistance), VoidFogManager.getFogDistance()));
+		//evt.fogDistance = Math.min(evt.fogDistance, Math.min(MonsterFX.rampFog(evt.fogDistance), VoidFogManager.getFogDistance()));
 	}
 
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public void dynamicFog(FarClippingPlaneEvent evt) {
-		evt.farClippingPlaneDistance = Math.min(evt.farClippingPlaneDistance, Math.min(MonsterFX.rampFog(evt.farClippingPlaneDistance), VoidFogManager.getFogDistance()));
+		//evt.farClippingPlaneDistance = Math.min(evt.farClippingPlaneDistance, Math.min(MonsterFX.rampFog(evt.farClippingPlaneDistance), VoidFogManager.getFogDistance()));
 	}
 
 	@SubscribeEvent

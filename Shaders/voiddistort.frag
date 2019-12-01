@@ -7,14 +7,9 @@ uniform int screenWidth;
 uniform int screenHeight;
 uniform mat4 modelview;
 uniform mat4 projection;
+uniform vec3 focus;
 
 uniform float intensity;
-//uniform float monsterX;
-//uniform float monsterY;
-//uniform float monsterZ;
-
-uniform float screenX;
-uniform float screenY;
 
 float dist(vec2 a, vec2 b) {
 	float f = float(screenHeight)/float(screenWidth);
@@ -33,20 +28,12 @@ void main() {
 	//float gs = (r+g+b)/3;
 	float gs = r*0.2989+g*0.5870+b*0.1140;
 	
-	/*
-	mat4 matrix = projection * modelview;
-	vec4 hc =  matrix * vec4(0, 0, 0, 1);
-	vec2 monsterXY = clamp((hc / hc.w).xy, 0, 1);
-	*//*
-	vec4 clipSpacePos = projection * (modelview * vec4(monsterX, monsterY, monsterZ, 1.0));
+	vec4 clipSpacePos = projection * (modelview * vec4(0, 0, 0, 1.0));
 	vec3 ndcSpacePos = clipSpacePos.xyz / clipSpacePos.w;
-	vec2 monsterXY = ((ndcSpacePos.xy + 1.0) / 2.0) * vec2(screenWidth, screenHeight);
-	*/
-	//vec2 monsterXY = (matrix * vec4(0, 0, 0, 1)).xy;
-	vec2 monsterXY = vec2(screenX, screenY);
+	vec2 monsterXY = ((ndcSpacePos.xy + 1.0) / 2.0);
 	
 	float dist = dist(monsterXY, texcoord);
-	float distfac = max(0, 1-3.5*dist*dist);
+	float distfac = max(0.0, 1.0-3.5*dist*dist);
 	float bf = intensity*distfac;
 	
 	vec3 net = mix(color.rgb, vec3(gs), bf);
