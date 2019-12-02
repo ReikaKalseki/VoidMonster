@@ -1,21 +1,3 @@
-varying vec2 texcoord;
-
-uniform int time;
-uniform int screenWidth;
-uniform int screenHeight;
-uniform mat4 modelview;
-uniform mat4 projection;
-uniform vec3 focus;
-
-uniform float intensity;
-
-float dist(vec2 a, vec2 b) {
-	float f = float(screenHeight)/float(screenWidth);
-	float dx = (a.x-b.x);
-	float dy = (a.y-b.y)*f;
-	return sqrt(dx*dx+dy*dy);
-}
-
 void main() {
     vec4 vert = gl_Vertex;
 	gl_Position = gl_ModelViewProjectionMatrix * vert;
