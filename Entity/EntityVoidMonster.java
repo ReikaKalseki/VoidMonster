@@ -154,12 +154,27 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 		this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(15.0D*f);
 	}
 
+	@Override
+	public boolean isInRangeToRender3d(double x, double y, double z) {
+		return true;
+	}
+
 	public float getDifficulty() {
 		return VoidMonster.instance.getMonsterDifficulty();
 	}
 
 	public void addHook(VoidMonsterHook h) {
 		hooks.add(h);
+	}
+
+	@Override
+	protected boolean canDespawn() {
+		return false;
+	}
+
+	@Override
+	protected void despawnEntity() {
+
 	}
 
 	@Override
@@ -213,7 +228,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 		if (entityToAttack == null)
 			entityToAttack = worldObj.getClosestPlayerToEntity(this, -1);
 		if (entityToAttack != null && hitCooldown == 0) {
-			;//this.moveToAttackEntity(entityToAttack, f);
+			this.moveToAttackEntity(entityToAttack, f);
 		}
 
 		if (hitCooldown > 0)
