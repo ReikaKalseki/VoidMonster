@@ -1,7 +1,7 @@
 uniform float distance;
 
 float scaleFactor(float dist) {
-    return 1.0+intensity*max(0.0, min(1.0, max(0.0, 18.0/distance))*min(4.0, 0.009/dist));
+    return 1.0+intensity*min(1.0, distance/5.0)*max(0.0, min(1.0, max(0.0, 18.0/distance))*min(4.0, 0.009/dist));
 }
 
 void main() {

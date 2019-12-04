@@ -254,6 +254,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 			motionTracker.update(posX, posY, posZ);
 			if (!isGhost) {
 				this.eatTorches();
+				this.attractDebris();
 				if (posY >= 0.5) {
 					if (motionTracker.getLastMoved() > 80 || motionTracker.getTotalTravelDistanceSince(60) < 4) { //4s with no movement or 30s with < 2 blocks movement
 						this.onTrap();
@@ -263,6 +264,32 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 		}
 		else
 			this.playSounds();
+	}
+
+	private void attractDebris() {
+		AxisAlignedBB box = ReikaAABBHelper.getEntityCenteredAABB(this, 9);
+		List<Entity> li = worldObj.getEntitiesWithinAABB(Entity.class, box);
+		for (Entity e : li) {
+			if (e == this)
+				continue;
+			this.suck(e);
+		}
+	}
+
+	private void suck(Entity e) {
+		double dx = e.posX-posX;
+		double dy = e.posY-posY;
+		double dz = e.posZ-posZ;
+		double dd = Math.max(0.25, ReikaMathLibrary.py3d(dx, dy, dz));
+		double v = -0.04;
+		if (e instanceof EntityLivingBase)
+			v *= 0.4;
+		e.motionX += v*dx/dd;
+		e.motionY += v*dy/dd+0.06; //0.06 is to fight gravity
+		e.motionZ += v*dz/dd;
+		e.noClip = false;
+		if (!(e instanceof EntityPlayer))
+			e.velocityChanged = true;
 	}
 
 	private Entity findNearestBait() {
@@ -506,6 +533,11 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 	@Override
 	public boolean canBeCollidedWith() {
 		return !isGhost;
+	}
+
+	@Override
+	public boolean canBePushed() {
+		return false;
 	}
 
 	@Override
