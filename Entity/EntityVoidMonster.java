@@ -213,7 +213,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 		if (entityToAttack == null)
 			entityToAttack = worldObj.getClosestPlayerToEntity(this, -1);
 		if (entityToAttack != null && hitCooldown == 0) {
-			this.moveToAttackEntity(entityToAttack, f);
+			;//this.moveToAttackEntity(entityToAttack, f);
 		}
 
 		if (hitCooldown > 0)

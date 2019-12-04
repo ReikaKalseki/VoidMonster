@@ -1,19 +1,23 @@
-float scaleFactor(vec2 a, vec2 b){
-    return 1.0/pow(distsq(a, b)*8.0+1.0+0.5, 2.0);
+uniform float distance;
+
+float scaleFactor(float dist) {
+    return 1.0+intensity*max(0.0, min(1.0, max(0.0, 18.0/distance))*min(4.0, 0.009/dist));
 }
 
 void main() {
-	vec2 monsterXY = getScreenPos(0.0, 0.0, 0.0);
+	vec2 monsterXY = getScreenPos(0.0, 0.5, 0.0);
+	
+    vec4 color = texture2D(bgl_RenderedTexture, texcoord);
 	
 	float distv = distsq(monsterXY, texcoord);
 	float distfac_color = max(0.0, 1.0-3.5*distv);
 	float cf = intensity*distfac_color;
 	
-	vec2 diff = normalize(texcoord-monsterXY);
-	diff *= scaleFactor(texcoord, monsterXY);
+	vec2 diff = texcoord-monsterXY;
+	diff *= scaleFactor(distv);
 	texcoord = monsterXY+diff;
 	
-    vec4 color = texture2D(bgl_RenderedTexture, texcoord);
+    color = texture2D(bgl_RenderedTexture, texcoord);
     
     float gs = getVisualBrightness(color.rgb);
 	

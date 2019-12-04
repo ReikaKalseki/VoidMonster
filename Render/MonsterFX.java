@@ -66,6 +66,7 @@ public class MonsterFX {
 				monsterScreenFactor = Math.min(monsterScreenFactor+0.05F, 1);
 				//isVisible = true;
 				monsterDist = ev.getDistance(RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
+				VoidClient.getShader().setField("distance", monsterDist);
 			}
 		}
 	}
@@ -84,7 +85,7 @@ public class MonsterFX {
 
 	public static void onRenderLoop(int pass) {
 		monsterScreenFactor = Math.max(monsterScreenFactor-0.0125F, 0);
-		VoidClient.getShader().setEnabled(monsterScreenFactor > 0);
+		VoidClient.getShader().setEnabled(monsterScreenFactor > 0); //  && !(Minecraft.getMinecraft().currentScreen instanceof GuiIngameMenu))
 		VoidClient.getShader().setIntensity(monsterScreenFactor);
 		if (pass == 1) {
 			for (EntityVoidMonster ev : VoidMonster.getCurrentMonsterList(Minecraft.getMinecraft().theWorld))
