@@ -46,7 +46,7 @@ public class MonsterFX {
 		 */
 
 	private static float getFogDistance() {
-		return 3+1.1F*(float)monsterDist;
+		return 3+1.1F*(float)monsterDist*5F;
 	}
 
 	public static void onRender(EntityVoidMonster ev, float par2) {

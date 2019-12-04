@@ -39,7 +39,7 @@ public class VoidClient extends VoidCommon {
 	public void registerRenderers() {
 		RenderingRegistry.registerEntityRenderingHandler(EntityVoidMonster.class, new RenderVoidMonster());
 
-		monsterDistortion = ShaderRegistry.createShader(VoidMonster.instance, "voiddistort", VoidMonster.class, "Shaders/", ShaderDomain.GLOBALNOGUI).setEnabled(false);
+		monsterDistortion = ShaderRegistry.createShader(VoidMonster.instance, "voiddistort", VoidMonster.class, "Shaders/", ShaderDomain.GLOBAL).setEnabled(false);
 	}
 
 	public static ShaderProgram getShader() {
