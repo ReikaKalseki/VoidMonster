@@ -346,7 +346,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 	}
 
 	private void moveToAttackEntity(Entity t, float f) {
-		double dist = this.moveTowards(t.posX, t.posY, t.posZ, f);
+		double dist = this.moveTowards(t.posX, t.posY, t.posZ, f, false);
 
 		if (!worldObj.isRemote) {
 			if (t instanceof VoidMonsterBait) {
@@ -391,6 +391,10 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 	}
 
 	public double moveTowards(double x, double y, double z, double vel) {
+		return this.moveTowards(x, y, z, vel, true);
+	}
+
+	private double moveTowards(double x, double y, double z, double vel, boolean add) {
 		double dx = posX-x;
 		double dy = posY-(y-1.62*0);//entityToAttack.getEyeHeight();
 		double dz = posZ-z;
@@ -416,9 +420,19 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 		else if (dist >= 16) {
 			f2 = 1.5+(dist-16)/32D; //1.5 at 16, 4 at 96 (was 2 in all cases)
 		}
-		motionX = -dx/d/16D*vel*f2*f3;
-		motionY = -dy/d/16D*vel*6*f3;
-		motionZ = -dz/d/16D*vel*f2*f3;
+		double vx = -dx/d/16D*vel*f2*f3;
+		double vy = -dy/d/16D*vel*6*f3;
+		double vz = -dz/d/16D*vel*f2*f3;
+		if (add) {
+			motionX += vx;
+			motionY += vy;
+			motionZ += vz;
+		}
+		else {
+			motionX = vx;
+			motionY = vy;
+			motionZ = vz;
+		}
 		velocityChanged = true;
 
 		return dist;

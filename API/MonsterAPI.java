@@ -80,7 +80,7 @@ public class MonsterAPI {
 			double dist = Double.POSITIVE_INFINITY;
 			Entity ret = null;
 			for (Entity e : c) {
-				double d = ret.getDistanceSq(x, y, z);
+				double d = e.getDistanceSq(x, y, z);
 				if (ret == null || d < dist) {
 					dist = d;
 					ret = e;
