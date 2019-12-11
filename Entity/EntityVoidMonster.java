@@ -66,6 +66,7 @@ import Reika.RotaryCraft.Items.ItemVoidMetalRailgunAmmo.VoidMetalRailGunAmmo;
 import Reika.VoidMonster.VoidMonster;
 import Reika.VoidMonster.API.NonTeleportingDamage;
 import Reika.VoidMonster.API.PlayerLookAtVoidMonsterEvent;
+import Reika.VoidMonster.API.VoidMonsterEatLightEvent;
 import Reika.VoidMonster.API.VoidMonsterHook;
 import Reika.VoidMonster.Auxiliary.GhostMonsterDamage;
 import Reika.VoidMonster.Auxiliary.VoidMonsterBait;
@@ -509,9 +510,13 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 							int meta = worldObj.getBlockMetadata(x, y, z);
 							if (!b.hasTileEntity(meta) && b.getBlockHardness(worldObj, x, y, z) >= 0) {
 								if (b.getLightValue(worldObj, x, y, z) > 0) {
-									ReikaWorldHelper.dropBlockAt(worldObj, x, y, z, null);
-									ReikaSoundHelper.playBreakSound(worldObj, x, y, z, b);
-									worldObj.setBlockToAir(x, y, z);
+									VoidMonsterEatLightEvent evt = new VoidMonsterEatLightEvent(worldObj, x, y, z, b, meta);
+									MinecraftForge.EVENT_BUS.post(evt);
+									if (b == Blocks.torch || b == Blocks.glowstone || !evt.isCanceled()) {
+										ReikaWorldHelper.dropBlockAt(worldObj, x, y, z, null);
+										ReikaSoundHelper.playBreakSound(worldObj, x, y, z, b);
+										worldObj.setBlockToAir(x, y, z);
+									}
 								}
 							}
 						}
