@@ -86,6 +86,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 
 	private boolean isNether;
 	private boolean isGhost;
+	public boolean forcePersist;
 
 	public int innerRotation;
 
@@ -180,7 +181,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 
 	@Override
 	public void onUpdate() {
-		if (!VoidMonster.allowedIn(worldObj)) {
+		if (!forcePersist && !VoidMonster.allowedIn(worldObj)) {
 			this.setDead();
 			return;
 		}
@@ -272,6 +273,8 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 		List<Entity> li = worldObj.getEntitiesWithinAABB(Entity.class, box);
 		for (Entity e : li) {
 			if (e == this)
+				continue;
+			if (e instanceof VoidMonsterBait)
 				continue;
 			this.suck(e);
 		}
@@ -511,9 +514,10 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 	}
 
 	private void eatTorches() {
-		int r = 3;
+		int r = this.isNetherVoid() ? 4 : 3;
+		int ry = this.isNetherVoid() ? r+2 : r;
 		for (int i = -r; i <= r; i++) {
-			for (int j = -r; j <= r; j++) {
+			for (int j = -ry; j <= ry; j++) {
 				for (int k = -r; k <= r; k++) {
 					int x = MathHelper.floor_double(posX)+i;
 					int y = MathHelper.floor_double(posY)+j;
@@ -683,8 +687,9 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 
 		nbt.setBoolean("nether", isNether);
 		nbt.setBoolean("ghost", isGhost);
+		nbt.setBoolean("persist", forcePersist);
 
-		nbt.setBoolean("isdead", isDead);
+		nbt.setBoolean("isdead", isDead && !forcePersist);
 	}
 
 	@Override
@@ -693,6 +698,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 
 		isNether = nbt.getBoolean("nether");
 		isGhost = nbt.getBoolean("ghost");
+		forcePersist = nbt.getBoolean("persist");
 
 		if (nbt.getBoolean("isdead"))
 			this.setDead();
@@ -819,8 +825,9 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 	}
 
 	@Override
-	public void setDead()
-	{
+	public void setDead() {
+		if (forcePersist)
+			return;
 		super.setDead();
 	}
 
@@ -870,7 +877,8 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 
 	@Override
 	public void destroy() {
-		this.setDead();
+		if (!forcePersist)
+			this.setDead();
 	}
 
 	@Override
