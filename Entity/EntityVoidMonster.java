@@ -842,8 +842,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 	}
 
 	@Override
-	public boolean canRenderOnFire()
-	{
+	public boolean canRenderOnFire() {
 		return false;
 	}
 

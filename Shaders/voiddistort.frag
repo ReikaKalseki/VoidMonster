@@ -15,9 +15,9 @@ void main() {
 	
 	vec2 diff = texcoord-monsterXY;
 	diff *= scaleFactor(distv);
-	texcoord = monsterXY+diff;
+	vec2 texUV = monsterXY+diff;
 	
-    color = texture2D(bgl_RenderedTexture, texcoord);
+    color = texture2D(bgl_RenderedTexture, texUV);
     
     float gs = getVisualBrightness(color.rgb);
 	
