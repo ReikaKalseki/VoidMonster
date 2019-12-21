@@ -23,6 +23,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
@@ -64,7 +65,6 @@ import Reika.RotaryCraft.API.Interfaces.RailGunAmmo.RailGunAmmoType;
 import Reika.RotaryCraft.API.Interfaces.TargetEntity;
 import Reika.RotaryCraft.Items.ItemVoidMetalRailgunAmmo.VoidMetalRailGunAmmo;
 import Reika.VoidMonster.VoidMonster;
-import Reika.VoidMonster.API.NonTeleportingDamage;
 import Reika.VoidMonster.API.PlayerLookAtVoidMonsterEvent;
 import Reika.VoidMonster.API.VoidMonsterEatLightEvent;
 import Reika.VoidMonster.API.VoidMonsterHook;
@@ -87,6 +87,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 	private boolean isNether;
 	private boolean isGhost;
 	public boolean forcePersist;
+	private float baseDifficulty = 1;
 
 	public int innerRotation;
 
@@ -145,6 +146,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 	@Override
 	protected void entityInit() {
 		super.entityInit();
+		baseDifficulty = 1;
 		dataWatcher.addObject(31, healTime);
 	}
 
@@ -162,7 +164,14 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 	}
 
 	public float getDifficulty() {
-		return VoidMonster.instance.getMonsterDifficulty();
+		return baseDifficulty*VoidMonster.instance.getMonsterDifficulty();
+	}
+
+	public void increaseDifficulty(float mult) {
+		if (mult < 1)
+			throw new IllegalArgumentException(mult+" is < 1!");
+		baseDifficulty *= mult;
+		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).applyModifier(new AttributeModifier("Void monster difficulty boost "+mult, mult, 1));
 	}
 
 	public void addHook(VoidMonsterHook h) {
@@ -763,7 +772,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 			src.getEntity().attackEntityFrom(DamageSource.outOfWorld, reflect);
 		}
 		boolean flag = super.attackEntityFrom(src, net);
-		if (flag && this.getHealth() > 0 && !ghostDamage && !monsterDamage && !(src instanceof NonTeleportingDamage)) {
+		if (flag && this.getHealth() > 0 && !ghostDamage && !monsterDamage) {
 			hitCooldown = 50;
 			this.teleport(src.getEntity());
 		}
@@ -826,7 +835,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 
 	@Override
 	public void setDead() {
-		if (forcePersist)
+		if (forcePersist && this.getHealth() > 0)
 			return;
 		super.setDead();
 	}

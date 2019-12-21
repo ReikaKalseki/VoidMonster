@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -74,12 +74,12 @@ public class MonsterAPI {
 		addDrop(new ItemStack(b), 1, 1);
 	}
 
-	public static Entity getNearestMonster(World world, double x, double y, double z) {
+	public static EntityLiving getNearestMonster(World world, double x, double y, double z) {
 		try {
-			Collection<Entity> c = (Collection<Entity>)getList.invoke(null, world);
+			Collection<EntityLiving> c = (Collection<EntityLiving>)getList.invoke(null, world);
 			double dist = Double.POSITIVE_INFINITY;
-			Entity ret = null;
-			for (Entity e : c) {
+			EntityLiving ret = null;
+			for (EntityLiving e : c) {
 				double d = e.getDistanceSq(x, y, z);
 				if (ret == null || d < dist) {
 					dist = d;

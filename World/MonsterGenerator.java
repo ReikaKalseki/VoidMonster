@@ -16,6 +16,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Random;
 
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
@@ -130,7 +131,7 @@ public class MonsterGenerator implements TickHandler {
 		return (get == null && !whitelist) || (get != null && get.booleanValue());
 	}
 
-	public void addCooldown(EntityVoidMonster e, int delay) {
+	public void addCooldown(EntityLiving e, int delay) {
 		Integer get = monsterCooldown.get(e.worldObj.provider.dimensionId);
 		int put = Math.max(get != null ? get.intValue() : 0, delay);
 		monsterCooldown.put(e.worldObj.provider.dimensionId, put);
