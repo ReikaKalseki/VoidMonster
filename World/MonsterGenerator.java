@@ -24,6 +24,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 import Reika.DragonAPI.DragonOptions;
 import Reika.DragonAPI.ModList;
+import Reika.DragonAPI.Auxiliary.Trackers.SpecialDayTracker;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry.TickHandler;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry.TickType;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
@@ -75,7 +76,7 @@ public class MonsterGenerator implements TickHandler {
 		long time = System.currentTimeMillis();
 		if (time-cachedLoadTime > 60000) {
 			Calendar c = Calendar.getInstance();
-			boolean flag = c.get(Calendar.MONTH) == Calendar.OCTOBER && c.get(Calendar.DAY_OF_MONTH) >= 30;
+			boolean flag = SpecialDayTracker.instance.isHalloween();
 			cachedLoadTime = time;
 			cachedLoadState = flag;
 		}
