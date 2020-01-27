@@ -22,6 +22,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.effect.EntityLightningBolt;
@@ -47,6 +48,7 @@ import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.ASM.DependentMethodStripper.ModDependent;
 import Reika.DragonAPI.Instantiable.MotionTracker;
 import Reika.DragonAPI.Instantiable.RayTracer;
+import Reika.DragonAPI.Interfaces.Entity.ClampedDamage;
 import Reika.DragonAPI.Interfaces.Entity.DestroyOnUnload;
 import Reika.DragonAPI.Libraries.ReikaAABBHelper;
 import Reika.DragonAPI.Libraries.ReikaEntityHelper;
@@ -81,8 +83,9 @@ import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
+import thaumcraft.api.IWarpingGear;
 
-public final class EntityVoidMonster extends EntityMob implements RadarJammer, DestroyOnUnload, IEntityAdditionalSpawnData, TargetEntity {
+public final class EntityVoidMonster extends EntityMob implements RadarJammer, DestroyOnUnload, IEntityAdditionalSpawnData, TargetEntity, ClampedDamage {
 
 	private boolean isNether;
 	private boolean isGhost;
@@ -111,8 +114,8 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 					ie.extractEnergy(input, 100+ie.getEnergyStored(input)/5, false);
 					return 0;
 				}
-				else if (ThaumItemHelper.isVoidMetalArmor(input)) { //make this immune to damage, but still reduce incoming
-					return amt*5/4;
+				else if (input.getItem() instanceof IWarpingGear) { //make this immune to damage, but still reduce incoming
+					return ThaumItemHelper.isVoidMetalArmor(input) ? amt*5/4 : amt/2;
 				}
 			}
 			return null;
@@ -190,7 +193,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 
 	@Override
 	public void onUpdate() {
-		if (!forcePersist && !VoidMonster.allowedIn(worldObj)) {
+		if (!forcePersist && (!VoidMonster.allowedIn(worldObj) || worldObj.playerEntities.isEmpty())) {
 			this.setDead();
 			return;
 		}
@@ -238,8 +241,10 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 		entityToAttack = this.findNearestBait();
 		if (entityToAttack == null)
 			entityToAttack = worldObj.getClosestPlayerToEntity(this, -1);
+		double dist = -1;
 		if (entityToAttack != null && hitCooldown == 0) {
-			this.moveToAttackEntity(entityToAttack, f);
+			if (!this.isNetherVoid() || entityToAttack.posY > 125)
+				dist = this.moveToAttackEntity(entityToAttack, f);
 		}
 
 		if (hitCooldown > 0)
@@ -273,7 +278,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 				}
 			}
 		}
-		else
+		else if (dist >= 0 && dist < 24)
 			this.playSounds();
 	}
 
@@ -284,6 +289,8 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 			if (e == this)
 				continue;
 			if (e instanceof VoidMonsterBait)
+				continue;
+			if (e instanceof IProjectile && ReikaEntityHelper.getShootingEntity(e) != null)
 				continue;
 			this.suck(e);
 		}
@@ -357,7 +364,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 		}
 	}
 
-	private void moveToAttackEntity(Entity t, float f) {
+	private double moveToAttackEntity(Entity t, float f) {
 		double dist = this.moveTowards(t.posX, t.posY, t.posZ, f, false);
 
 		if (!worldObj.isRemote) {
@@ -370,9 +377,9 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 			}
 			else if (t instanceof EntityLivingBase) {
 				EntityLivingBase e = (EntityLivingBase)t;
-				boolean LOS = this.canSee(e);
+				boolean LOS = dist <= 60 && this.canSee(e);
 				if (e instanceof EntityPlayer) {
-					if (dist < 60 && LOS && ModList.THAUMCRAFT.isLoaded() && ReikaEntityHelper.isLookingAt(e, this)) {
+					if (LOS && ModList.THAUMCRAFT.isLoaded() && ReikaEntityHelper.isLookingAt(e, this)) {
 						MinecraftForge.EVENT_BUS.post(new PlayerLookAtVoidMonsterEvent((EntityPlayer)e, this));
 						if (rand.nextInt(50) == 0)
 							ReikaThaumHelper.addPlayerTempWarp((EntityPlayer)e, 1);
@@ -400,6 +407,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 				}
 			}
 		}
+		return dist;
 	}
 
 	public double moveTowards(double x, double y, double z, double vel) {
@@ -486,7 +494,8 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 			if (attack <= 0)
 				return;
 		}
-		attack -= this.drainArmor(e, attack);
+		int armor = this.drainArmor(e, attack*0.8F); //make 20% leak through no matter what
+		attack -= armor;
 		if (attack <= 0)
 			return;
 		ReikaEntityHelper.doSetHealthDamage(e, new VoidMonsterDamage(this), attack);
@@ -506,7 +515,8 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 			//for (int slot : slots) {
 			//this.handleArmorSlot(e, slot, e.getEquipmentInSlot(slot), MathHelper.ceiling_float_int(perSlot));
 			//}
-			ret += ReikaEntityHelper.damageArmor(e, MathHelper.ceiling_float_int(perSlot), armorEffects);
+			int armor = ReikaEntityHelper.damageArmor(e, MathHelper.ceiling_float_int(perSlot), armorEffects);
+			ret += armor;
 		}
 		return ret;
 	}
@@ -727,39 +737,9 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 	public boolean attackEntityFrom(DamageSource src, float dmg) {
 		boolean ghostDamage = src instanceof GhostMonsterDamage;
 		boolean monsterDamage = src instanceof VoidMonsterDamage;
-		float cap = 20;
-		if (monsterDamage) {
-			cap = 50;
-		}
-		else {
-			if (ghostDamage) {
-				cap = 50;
-			}
-			else {
-				if (isGhost)
-					return false;
-				if (hitCooldown > 0)
-					return false;
-				if (src.isFireDamage() || src == DamageSource.fall || src == DamageSource.outOfWorld || src == DamageSource.inWall || src == DamageSource.drown)
-					return false;
-				Entity e = src.getEntity();
-				if (!(e instanceof EntityPlayer))
-					return false;
-				EntityPlayer ep = (EntityPlayer)e;
-				ItemStack weapon = ep.getCurrentEquippedItem();
-				if (ModList.THAUMCRAFT.isLoaded()) {
-					if (ThaumItemHelper.isVoidMetalTool(weapon)) {
-						cap *= 2F;
-					}
-					else if (ThaumItemHelper.isWarpingToolOrArmor(weapon)) {
-						cap *= 1.5F;
-					}
-				}
-			}
-			if (src.isMagicDamage() && dmg > 5000)
-				cap = 100;
-			cap /= this.getDifficulty();
-		}
+		float cap = this.getDamageCap(src, dmg);
+		if (cap <= 0)
+			return false;
 		if (this.isHealing()) {
 			this.playSound("random.bowhit", 1, 1);
 			return false;
@@ -777,6 +757,45 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 			this.teleport(src.getEntity());
 		}
 		return flag;
+	}
+
+	public float getDamageCap(DamageSource src, float dmg) {
+		boolean ghostDamage = src instanceof GhostMonsterDamage;
+		boolean monsterDamage = src instanceof VoidMonsterDamage;
+		float cap = 20;
+		if (monsterDamage) {
+			cap = 50;
+		}
+		else {
+			if (ghostDamage) {
+				cap = 50;
+			}
+			else {
+				if (isGhost)
+					return 0;
+				if (hitCooldown > 0)
+					return 0;
+				if (src.isFireDamage() || src == DamageSource.fall || src == DamageSource.outOfWorld || src == DamageSource.inWall || src == DamageSource.drown)
+					return 0;
+				Entity e = src.getEntity();
+				if (!(e instanceof EntityPlayer))
+					return 0;
+				EntityPlayer ep = (EntityPlayer)e;
+				ItemStack weapon = ep.getCurrentEquippedItem();
+				if (ModList.THAUMCRAFT.isLoaded()) {
+					if (ThaumItemHelper.isVoidMetalTool(weapon)) {
+						cap *= 2F;
+					}
+					else if (ThaumItemHelper.isWarpingToolOrArmor(weapon)) {
+						cap *= 1.5F;
+					}
+				}
+			}
+			if (src.isMagicDamage() && dmg > 5000)
+				cap = 100;
+			cap /= this.getDifficulty();
+		}
+		return cap;
 	}
 
 	private void teleport(Entity e) {
