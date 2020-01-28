@@ -504,9 +504,13 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 	private int drainArmor(EntityLivingBase e, float attack) {
 		HashSet<Integer> slots = new HashSet();
 		int ret = 0;
+		float f = 1;
 		for (int i = 1; i < 5; i++) {
 			ItemStack is = e.getEquipmentInSlot(i);
 			if (is != null && is.getItem() instanceof ItemArmor) {
+				if (ModList.THAUMCRAFT.isLoaded()) {
+					f = this.modifyPerArmorDamage(f, is);
+				}
 				slots.add(i);
 			}
 		}
@@ -515,10 +519,23 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 			//for (int slot : slots) {
 			//this.handleArmorSlot(e, slot, e.getEquipmentInSlot(slot), MathHelper.ceiling_float_int(perSlot));
 			//}
-			int armor = ReikaEntityHelper.damageArmor(e, MathHelper.ceiling_float_int(perSlot), armorEffects);
-			ret += armor;
+			int armor = ReikaEntityHelper.damageArmor(e, MathHelper.ceiling_float_int(perSlot*f), armorEffects);
+			ret += armor/f;
 		}
 		return ret;
+	}
+
+	@ModDependent(ModList.THAUMCRAFT)
+	private float modifyPerArmorDamage(float f, ItemStack is) {
+		if (is.getItem() instanceof IWarpingGear) {
+			if (ThaumItemHelper.isVoidMetalArmor(is)) {
+				f -= 0.225; //10% dura damage if full set
+			}
+			else {
+				f -= 0.125; //50% dura damage if full set
+			}
+		}
+		return f;
 	}
 
 	@ModDependent(ModList.BLOODMAGIC)
