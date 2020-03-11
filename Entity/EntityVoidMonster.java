@@ -114,7 +114,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 					ie.extractEnergy(input, 100+ie.getEnergyStored(input)/5, false);
 					return 0;
 				}
-				else if (input.getItem() instanceof IWarpingGear) { //make this immune to damage, but still reduce incoming
+				else if (InterfaceCache.WARPGEAR.instanceOf(input.getItem())) { //make this immune to damage, but still reduce incoming
 					return ThaumItemHelper.isVoidMetalArmor(input) ? amt*5/4 : amt/2;
 				}
 			}

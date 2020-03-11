@@ -56,7 +56,6 @@ import forestry.api.apiculture.IBeeGenome;
 import forestry.api.apiculture.IBeeHousing;
 import forestry.api.core.EnumHumidity;
 import forestry.api.core.EnumTemperature;
-import forestry.api.genetics.IAllele;
 import forestry.api.genetics.IAlleleFlowers;
 import forestry.api.genetics.IEffectData;
 import forestry.api.genetics.IFlowerAcceptableRule;
@@ -111,7 +110,7 @@ public class VoidMonsterBee extends BeeSpecies {
 
 	@ModDependent(ModList.CHROMATICRAFT)
 	private static void addAlvearyEffect() {
-		voidMonsterAlvearyEffect = new LumenAlvearyEffect(CrystalElement.PINK, 200){
+		voidMonsterAlvearyEffect = new LumenAlvearyEffect("voidmonster", CrystalElement.PINK, 200){
 
 			@Override
 			protected boolean ticksOnClient() {
@@ -166,13 +165,15 @@ public class VoidMonsterBee extends BeeSpecies {
 
 	private final class AlleleVoid extends BasicGene implements IAlleleFlowers {
 
+		private final FlowerProviderVoid flowers = new FlowerProviderVoid();
+
 		public AlleleVoid() {
 			super("flower.void", "Void", EnumBeeChromosome.FLOWER_PROVIDER);
 		}
 
 		@Override
 		public IFlowerProvider getProvider() {
-			return new FlowerProviderVoid();
+			return flowers;
 		}
 	}
 
@@ -322,7 +323,7 @@ public class VoidMonsterBee extends BeeSpecies {
 	}
 
 	@Override
-	public IAllele getFlowerAllele() {
+	public IAlleleFlowers getFlowerAllele() {
 		return voidflower;
 	}
 
