@@ -30,9 +30,11 @@ import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry.TickType;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
 import Reika.DragonAPI.Libraries.ReikaPlayerAPI;
 import Reika.DragonAPI.Libraries.Java.ReikaObfuscationHelper;
+import Reika.DragonAPI.ModInteract.DeepInteract.ReikaMystcraftHelper;
 import Reika.DragonAPI.ModInteract.ItemHandlers.ExtraUtilsHandler;
 import Reika.VoidMonster.VoidMonster;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
+import Reika.VoidMonster.ModInterface.VoidMystPages;
 
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 
@@ -123,7 +125,8 @@ public class MonsterGenerator implements TickHandler {
 		Collection<EntityVoidMonster> li = VoidMonster.getCurrentMonsterList(world);
 		if (li != null && !li.isEmpty())
 			return false;
-
+		if (ModList.MYSTCRAFT.isLoaded() && ReikaMystcraftHelper.isMystAge(world))
+			return !VoidMystPages.instance.existsInWorld(world);
 		return this.isHardcodedAllowed(world.provider.dimensionId) || this.isDimensionAllowed(world);
 	}
 

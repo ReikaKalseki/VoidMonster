@@ -7,7 +7,7 @@
  * Distribution of the software in any form is only allowed with
  * explicit, prior permission from the owner.
  ******************************************************************************/
-package Reika.VoidMonster.Auxiliary;
+package Reika.VoidMonster.ModInterface;
 
 import java.util.Collection;
 
@@ -44,6 +44,7 @@ import Reika.DragonAPI.ModInteract.Bees.BeeAlleleRegistry.Tolerance;
 import Reika.DragonAPI.ModInteract.Bees.BeeSpecies;
 import Reika.DragonAPI.ModInteract.ItemHandlers.ForestryHandler;
 import Reika.VoidMonster.VoidMonster;
+import Reika.VoidMonster.Auxiliary.VoidMonsterDamage;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 
 import cpw.mods.fml.common.FMLCommonHandler;

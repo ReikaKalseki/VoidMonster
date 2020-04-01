@@ -48,6 +48,8 @@ import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.ASM.DependentMethodStripper.ModDependent;
 import Reika.DragonAPI.Instantiable.MotionTracker;
 import Reika.DragonAPI.Instantiable.RayTracer;
+import Reika.DragonAPI.Instantiable.RayTracer.MultipointChecker;
+import Reika.DragonAPI.Instantiable.RayTracer.RayTracerWithCache;
 import Reika.DragonAPI.Interfaces.Entity.ClampedDamage;
 import Reika.DragonAPI.Interfaces.Entity.DestroyOnUnload;
 import Reika.DragonAPI.Libraries.ReikaAABBHelper;
@@ -85,7 +87,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import thaumcraft.api.IWarpingGear;
 
-public final class EntityVoidMonster extends EntityMob implements RadarJammer, DestroyOnUnload, IEntityAdditionalSpawnData, TargetEntity, ClampedDamage {
+public final class EntityVoidMonster extends EntityMob implements MultipointChecker<EntityLivingBase>, RadarJammer, DestroyOnUnload, IEntityAdditionalSpawnData,
+TargetEntity, ClampedDamage {
 
 	private boolean isNether;
 	private boolean isGhost;
@@ -123,7 +126,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 
 	};
 
-	private static final RayTracer LOS = RayTracer.getVisualLOS();
+	private final RayTracerWithCache LOS = RayTracer.getMultipointVisualLOSForRenderCulling(this);
 
 	public EntityVoidMonster(World world) {
 		super(world);
@@ -377,7 +380,7 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 			}
 			else if (t instanceof EntityLivingBase) {
 				EntityLivingBase e = (EntityLivingBase)t;
-				boolean LOS = dist <= 60 && this.canSee(e);
+				boolean LOS = dist <= 60 && this.LOS.isClearLineOfSight(e);
 				if (e instanceof EntityPlayer) {
 					if (LOS && ModList.THAUMCRAFT.isLoaded() && ReikaEntityHelper.isLookingAt(e, this)) {
 						MinecraftForge.EVENT_BUS.post(new PlayerLookAtVoidMonsterEvent((EntityPlayer)e, this));
@@ -458,12 +461,12 @@ public final class EntityVoidMonster extends EntityMob implements RadarJammer, D
 		return dist;
 	}
 
-	private boolean canSee(Entity e) {
+	public boolean isClearLineOfSight(EntityLivingBase e, RayTracer ray, World world) {
 		for (double dx = -2; dx <= 2; dx += 0.5) {
 			for (double dy = -2; dy <= 0; dy += 0.5) { //+0, not +1 or +2, to avoid 'leaking' through bedrock
 				for (double dz = -2; dz <= 2; dz += 0.5) {
-					LOS.setOrigins(posX+dx, posY+dy, posZ+dz, e.posX, e.posY, e.posZ);
-					if (LOS.isClearLineOfSight(worldObj))
+					ray.setOrigins(posX+dx, posY+dy, posZ+dz, e.posX, e.posY, e.posZ);
+					if (ray.isClearLineOfSight(world))
 						return true;
 				}
 			}

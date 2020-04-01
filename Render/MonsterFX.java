@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
 
 import Reika.DragonAPI.Instantiable.RayTracer;
+import Reika.DragonAPI.Instantiable.RayTracer.RayTracerWithCache;
 import Reika.DragonAPI.Libraries.ReikaEntityHelper;
 import Reika.DragonAPI.Libraries.IO.ReikaTextureHelper;
 import Reika.DragonAPI.Libraries.Java.ReikaGLHelper.BlendMode;
@@ -30,7 +31,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class MonsterFX {
 
-	private static final RayTracer LOS = RayTracer.getVisualLOS();
+	private static final RayTracerWithCache LOS = RayTracer.getVisualLOSForRenderCulling();
 	//private static boolean isVisible;
 	private static double monsterDist;
 	//private static long lastMonsterRender;
@@ -52,8 +53,9 @@ public class MonsterFX {
 		if (ReikaEntityHelper.isInWorld(ev)) {
 			boolean los = clearLOS(ev);
 			if (!los) {
+				//LOS.update(ev);
 				LOS.setOrigins(ev.posX, ev.posY+1, ev.posZ, RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
-				los = LOS.isClearLineOfSight(ev.worldObj);
+				los = LOS.isClearLineOfSight(ev);
 			}
 
 			if (los) { //not isVisible, since may have multiple monsters, and flare is per-monster, but isVisible is global for things like fog
@@ -80,7 +82,7 @@ public class MonsterFX {
 				ev.setDead();
 			return false;
 		}*/
-		return LOS.isClearLineOfSight(ev.worldObj);
+		return LOS.isClearLineOfSight(ev);
 	}
 
 	public static void onRenderLoop(int pass) {

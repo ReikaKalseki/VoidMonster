@@ -33,9 +33,11 @@ import Reika.DragonAPI.Instantiable.Data.Maps.MultiMap;
 import Reika.DragonAPI.Instantiable.Data.Maps.MultiMap.CollectionType;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
+import Reika.DragonAPI.ModInteract.DeepInteract.ReikaMystcraftHelper;
 import Reika.DragonAPI.ModInteract.DeepInteract.ReikaThaumHelper;
-import Reika.VoidMonster.Auxiliary.VoidMonsterBee;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
+import Reika.VoidMonster.ModInterface.VoidMonsterBee;
+import Reika.VoidMonster.ModInterface.VoidMystPages;
 import Reika.VoidMonster.World.AmbientSoundGenerator;
 import Reika.VoidMonster.World.MonsterGenerator;
 
@@ -111,6 +113,10 @@ public class VoidMonster extends DragonAPIMod {
 		EntityRegistry.registerModEntity(EntityVoidMonster.class, "Void Monster", id, instance, 256, 10, true);
 
 		proxy.registerRenderers();
+
+		if (ModList.MYSTCRAFT.isLoaded()) {
+			ReikaMystcraftHelper.registerPageRegistry(VoidMystPages.instance);
+		}
 
 		MinecraftForge.EVENT_BUS.register(VoidMonsterEvents.instance);
 
