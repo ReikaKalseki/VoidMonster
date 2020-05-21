@@ -270,7 +270,7 @@ TargetEntity, ClampedDamage {
 		this.func_145771_j(posX, posY-0*4, posZ);
 
 		if (!worldObj.isRemote) {
-			motionTracker.update(posX, posY, posZ);
+			motionTracker.update(this);
 			if (!isGhost) {
 				this.eatTorches();
 				this.attractDebris();
