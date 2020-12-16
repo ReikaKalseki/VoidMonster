@@ -42,14 +42,14 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 
-import Reika.ChromatiCraft.Registry.ChromaIcons;
-import Reika.ChromatiCraft.Render.Particle.EntityBlurFX;
 import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.ASM.DependentMethodStripper.ModDependent;
+import Reika.DragonAPI.Extras.IconPrefabs;
 import Reika.DragonAPI.Instantiable.MotionTracker;
 import Reika.DragonAPI.Instantiable.RayTracer;
 import Reika.DragonAPI.Instantiable.RayTracer.MultipointChecker;
 import Reika.DragonAPI.Instantiable.RayTracer.RayTracerWithCache;
+import Reika.DragonAPI.Instantiable.Effects.EntityBlurFX;
 import Reika.DragonAPI.Interfaces.Entity.ClampedDamage;
 import Reika.DragonAPI.Interfaces.Entity.DestroyOnUnload;
 import Reika.DragonAPI.Libraries.ReikaAABBHelper;
@@ -686,9 +686,7 @@ TargetEntity, ClampedDamage {
 		super.onDeath(src);
 
 		if (worldObj.isRemote) {
-			if (ModList.CHROMATICRAFT.isLoaded()) {
-				this.spawnDeathParticles();
-			}
+			this.spawnDeathParticles();
 		}
 		else {
 			worldObj.addWeatherEffect(new EntityLightningBolt(worldObj, posX, posY, posZ));
@@ -697,17 +695,17 @@ TargetEntity, ClampedDamage {
 	}
 
 	@SideOnly(Side.CLIENT)
-	@ModDependent(ModList.CHROMATICRAFT)
 	private void spawnDeathParticles() {
 		for (int i = 0; i < 24; i++) {
 			float s = (float)ReikaRandomHelper.getRandomBetween(1.5, 5);
 			int l = ReikaRandomHelper.getRandomBetween(40, 200);
-			EntityBlurFX fx = new EntityBlurFX(worldObj, posX, posY, posZ).setColor(0x000000).setBasicBlend().setScale(s).setLife(l);
+			EntityBlurFX fx = new EntityBlurFX(worldObj, posX, posY, posZ, IconPrefabs.FADE_BASICBLEND.getIcon());
+			fx.setColor(0x000000).setBasicBlend().setScale(s).setLife(l);
 			double v = ReikaRandomHelper.getRandomBetween(0.0625, 0.25);
 			double[] xyz = ReikaPhysicsHelper.polarToCartesian(v, 0, rand.nextDouble()*360);
 			fx.motionX = xyz[0];
 			fx.motionZ = xyz[2];
-			fx.setColliding().setIcon(ChromaIcons.FADE_BASICBLEND);
+			fx.setColliding();
 			Minecraft.getMinecraft().effectRenderer.addEffect(fx);
 		}
 	}

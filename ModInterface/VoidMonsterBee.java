@@ -23,7 +23,7 @@ import Reika.ChromatiCraft.ModInterface.Bees.TileEntityLumenAlveary;
 import Reika.ChromatiCraft.ModInterface.Bees.TileEntityLumenAlveary.LumenAlvearyEffect;
 import Reika.ChromatiCraft.Registry.ChromaIcons;
 import Reika.ChromatiCraft.Registry.CrystalElement;
-import Reika.ChromatiCraft.Render.Particle.EntityBlurFX;
+import Reika.ChromatiCraft.Render.Particle.EntityCCBlurFX;
 import Reika.DragonAPI.DragonAPICore;
 import Reika.DragonAPI.ModList;
 import Reika.DragonAPI.ASM.DependentMethodStripper.ModDependent;
@@ -136,7 +136,7 @@ public class VoidMonsterBee extends BeeSpecies {
 						double px = ReikaRandomHelper.getRandomPlusMinus(c.posX+0.5, 1);
 						double py = ReikaRandomHelper.getRandomPlusMinus(c.posY+0.5, 1);
 						double pz = ReikaRandomHelper.getRandomPlusMinus(c.posZ+0.5, 1);
-						EntityBlurFX fx = new EntityBlurFX(te.worldObj, px, py, pz);
+						EntityCCBlurFX fx = new EntityCCBlurFX(te.worldObj, px, py, pz);
 						fx.setColor(0x000000).setBasicBlend().setScale(s).setLife(l);
 						double v = ReikaRandomHelper.getRandomBetween(0.03125, 0.0625);
 						double[] xyz = ReikaPhysicsHelper.polarToCartesian(v, 0, te.worldObj.rand.nextDouble()*360);

@@ -3,13 +3,13 @@ package Reika.VoidMonster.API;
 import net.minecraft.block.Block;
 import net.minecraft.world.World;
 
-import Reika.DragonAPI.Instantiable.Event.PositionEvent;
+import Reika.DragonAPI.Instantiable.Event.Base.WorldPositionEvent;
 
 import cpw.mods.fml.common.eventhandler.Cancelable;
 
 @Cancelable
 /** Note that cancellation will have no effect on torches or glowstone; those cannot be disabled. */
-public class VoidMonsterEatLightEvent extends PositionEvent {
+public class VoidMonsterEatLightEvent extends WorldPositionEvent {
 
 	public final Block block;
 	public final int metadata;
