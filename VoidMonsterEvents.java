@@ -25,7 +25,7 @@ import Reika.DragonAPI.Instantiable.Event.Client.EntityRenderingLoopEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.FarClippingPlaneEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.FogDistanceEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.SkyColorEvent;
-import Reika.DragonAPI.Libraries.IO.ReikaColorAPI;
+import Reika.DragonAPI.Libraries.Rendering.ReikaColorAPI;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import Reika.VoidMonster.Render.MonsterFX;
 import Reika.VoidMonster.Render.VoidFogManager;
