@@ -1,3 +1,7 @@
+#import math
+#import geometry
+#import color
+
 uniform float distance;
 
 float scaleFactor(float dist) {
