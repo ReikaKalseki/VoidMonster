@@ -15,9 +15,6 @@ import net.minecraft.world.World;
 import Reika.DragonAPI.IO.Shaders.ShaderProgram;
 import Reika.DragonAPI.IO.Shaders.ShaderRegistry;
 import Reika.DragonAPI.IO.Shaders.ShaderRegistry.ShaderDomain;
-import Reika.DragonAPI.Instantiable.IO.SingleSound;
-import Reika.DragonAPI.Instantiable.IO.SoundLoader;
-import Reika.DragonAPI.Interfaces.Registry.SoundEnum;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import Reika.VoidMonster.Render.RenderVoidMonster;
 
@@ -26,13 +23,12 @@ import cpw.mods.fml.client.registry.RenderingRegistry;
 
 public class VoidClient extends VoidCommon {
 
-	public static final SoundEnum monsterAura = new SingleSound("aura", "Reika/VoidMonster/aura3.ogg", SoundCategory.MASTER);
-
 	private static ShaderProgram monsterDistortion;
 
 	@Override
 	public void registerSounds() {
-		new SoundLoader(monsterAura).register();
+		monsterAura.setSoundCategory(SoundCategory.MASTER);
+		sounds.register();
 	}
 
 	@Override
@@ -49,8 +45,7 @@ public class VoidClient extends VoidCommon {
 	// Override any other methods that need to be handled differently client side.
 
 	@Override
-	public World getClientWorld()
-	{
+	public World getClientWorld() {
 		return FMLClientHandler.instance().getClient().theWorld;
 	}
 
