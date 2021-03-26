@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 
 import net.minecraft.entity.EntityLiving;
@@ -45,7 +46,7 @@ public class MonsterGenerator implements TickHandler {
 	private final Random rand = new Random();
 
 	private final HashMap<Integer, Boolean> APIRules = new HashMap();
-	private final HashMap<Integer, Boolean> spawnRules = new HashMap();
+	private final HashSet<Integer> configDimensionList = new HashSet();
 	private final HashMap<Integer, Integer> monsterCooldown = new HashMap();
 
 	private boolean whitelist;
@@ -131,8 +132,11 @@ public class MonsterGenerator implements TickHandler {
 	}
 
 	public boolean isDimensionAllowed(World world) {
-		Boolean get = spawnRules.get(world.provider.dimensionId);
-		return (get == null && !whitelist) || (get != null && get.booleanValue());
+		int id = world.provider.dimensionId;
+		Boolean get = APIRules.get(id);
+		if (get != null)
+			return get.booleanValue();
+		return configDimensionList.contains(id) == whitelist;
 	}
 
 	public void addCooldown(EntityLiving e, int delay) {
@@ -156,25 +160,14 @@ public class MonsterGenerator implements TickHandler {
 		return "Void Monster";
 	}
 
-	public void setDimensions(Collection<Integer> dimensions, boolean allow) {
+	public void setDimensions(Collection<Integer> dimensions) {
 		for (int id : dimensions) {
-			this.setDimension(id, allow);
-		}
-	}
-
-	public void setDimensions(HashMap<Integer, Boolean> dimensions) {
-		for (int id : dimensions.keySet()) {
-			this.setDimension(id, dimensions.get(id));
+			configDimensionList.add(id);
 		}
 	}
 
 	public void setDimensionRuleAPI(int id, boolean allow) {
-		this.setDimension(id, allow);
 		APIRules.put(id, allow);
-	}
-
-	public void setDimension(int id, boolean allow) {
-		spawnRules.put(id, allow);
 	}
 
 	private boolean isHardcodedAllowed(int id) {
@@ -188,11 +181,10 @@ public class MonsterGenerator implements TickHandler {
 	}
 
 	public void loadConfig(SimpleConfig config) {
-		spawnRules.clear();
+		configDimensionList.clear();
 		ArrayList<Integer> dimensions = config.getIntList("Control Setup", "Banned Dimensions", 1, -112);
 		whitelist = config.getBoolean("Control Setup", "Dimension list is actually whitelist", false);
-		this.setDimensions(dimensions, whitelist);
-		this.setDimensions(APIRules);
+		this.setDimensions(dimensions);
 	}
 
 }
