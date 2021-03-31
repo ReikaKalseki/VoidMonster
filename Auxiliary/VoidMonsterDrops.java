@@ -25,6 +25,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 
+import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Instantiable.ItemDrop;
 import Reika.DragonAPI.Instantiable.IO.CustomRecipeList;
 import Reika.DragonAPI.Instantiable.IO.LuaBlock;
@@ -56,26 +57,45 @@ public class VoidMonsterDrops {
 	}
 
 	public static void loadCustomDrops() {
-		CustomRecipeList crl = new CustomRecipeList(VoidMonster.instance, "drops");
-		crl.load();
-		for (LuaBlock lb : crl.getEntries()) {
-			Exception e = null;
-			boolean flag = false;
-			try {
-				flag = addCustomDrop(lb, crl);
+		CustomRecipeList crl = new DropList(VoidMonster.instance, "");
+		if (crl.load()) {
+			for (LuaBlock lb : crl.getEntries()) {
+				Exception e = null;
+				boolean flag = false;
+				try {
+					flag = addCustomDrop(lb, crl);
+				}
+				catch (Exception ex) {
+					e = ex;
+					flag = false;
+				}
+				if (flag) {
+					VoidMonster.logger.log("Loaded custom monster drop '"+lb.getString("type")+"'");
+				}
+				else {
+					VoidMonster.logger.logError("Could not load custom monster drop '"+lb.getString("type")+"'");
+					if (e != null)
+						e.printStackTrace();
+				}
 			}
-			catch (Exception ex) {
-				e = ex;
-				flag = false;
-			}
-			if (flag) {
-				VoidMonster.logger.log("Loaded custom monster drop '"+lb.getString("type")+"'");
-			}
-			else {
-				VoidMonster.logger.logError("Could not load custom monster drop '"+lb.getString("type")+"'");
-				if (e != null)
-					e.printStackTrace();
-			}
+		}
+		else {
+			crl.createFolders();
+			LuaBlock ex = crl.createExample("customDrop1");
+			crl.writeItem(ex, ReikaItemHelper.bonemeal);
+			ex.putData("min", 3);
+			ex.putData("max", 14);
+			ex = crl.createExample("customDrop2");
+			crl.writeItem(ex, new ItemStack(Items.redstone));
+			ex.putData("min", 1);
+			ex.putData("max", 6);
+			ex.putData("required_difficulty", 0.4);
+			ex = crl.createExample("customDrop3");
+			ItemStack is = new ItemStack(Items.diamond_axe);
+			ReikaEnchantmentHelper.applyEnchantment(is, Enchantment.fortune, 2);
+			crl.writeItem(ex, is);
+			ex.putData("required_difficulty", 1.5);
+			crl.createExampleFile();
 		}
 	}
 
@@ -85,7 +105,9 @@ public class VoidMonsterDrops {
 		if (is == null || is.getItem() == null)
 			throw new IllegalArgumentException("No such item '"+s+"'");
 		double d = lb.getDouble("required_difficulty"); //returns 0 if not present
-		addDrop(is, (float)d);
+		int min = Math.max(1, lb.getInt("min"));
+		int max = Math.max(1, lb.getInt("max"));
+		addDrop(is, min, max, (float)d);
 		return true;
 	}
 
@@ -150,6 +172,24 @@ public class VoidMonsterDrops {
 		for (ImmutablePair<Enchantment, Integer> p : li) {
 			ReikaItemHelper.dropItem(e.worldObj, e.posX, e.posY+0.25, e.posZ, ReikaEnchantmentHelper.getEnchantedBook(p.left, p.right));
 		}
+	}
+
+	private static class DropList extends CustomRecipeList {
+
+		public DropList(DragonAPIMod mod, String type) {
+			super(mod, type);
+		}
+
+		@Override
+		protected String getFolderName() {
+			return "CustomDrops";
+		}
+
+		@Override
+		protected String getExtension() {
+			return ".drops";
+		}
+
 	}
 
 	private static class VoidMonsterDrop extends ItemDrop {

@@ -15,7 +15,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
@@ -29,12 +28,15 @@ import Reika.DragonAPI.Auxiliary.Trackers.DonatorController;
 import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry;
 import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Base.DragonAPIMod.LoadProfiler.LoadPhase;
+import Reika.DragonAPI.Instantiable.Data.Collections.ThreadSafeSet;
+import Reika.DragonAPI.Instantiable.Data.Collections.ThreadSafeSet.DefaultIterationResult;
 import Reika.DragonAPI.Instantiable.Data.Maps.MultiMap;
 import Reika.DragonAPI.Instantiable.Data.Maps.MultiMap.CollectionType;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
 import Reika.DragonAPI.ModInteract.DeepInteract.ReikaMystcraftHelper;
 import Reika.DragonAPI.ModInteract.DeepInteract.ReikaThaumHelper;
+import Reika.VoidMonster.Auxiliary.VoidMonsterDrops;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
 import Reika.VoidMonster.ModInterface.VoidMonsterBee;
 import Reika.VoidMonster.ModInterface.VoidMystPages;
@@ -192,6 +194,8 @@ public class VoidMonster extends DragonAPIMod {
 			}
 		}
 
+		VoidMonsterDrops.loadCustomDrops();
+
 		this.finishTiming();
 	}
 
@@ -251,24 +255,18 @@ public class VoidMonster extends DragonAPIMod {
 	}
 
 	public static Collection<EntityVoidMonster> getCurrentMonsterList(World world) {
-		Iterator<Integer> it = monsterList.get(world.provider.dimensionId).iterator();
 		ArrayList<EntityVoidMonster> li = new ArrayList();
-		while (it.hasNext()) {
-			int id = it.next();
+		ThreadSafeSet<Integer> set = (ThreadSafeSet<Integer>)monsterList.get(world.provider.dimensionId);
+		set.iterate((Integer id) -> {
 			Entity e = world.getEntityByID(id);
-			if (e instanceof EntityVoidMonster)
-				li.add((EntityVoidMonster)e);
-			else
-				it.remove();
-		}
-		return li;
-
-		/*
-		 * for (Entity e : ((List<Entity>)world.loadedEntityList)) {
 			if (e instanceof EntityVoidMonster) {
-				return false;
+				li.add((EntityVoidMonster)e);
+				return DefaultIterationResult.CONTINUE;
 			}
-		}
-		 */
+			else {
+				return DefaultIterationResult.REMOVEANDCONTINUE;
+			}
+		});
+		return li;
 	}
 }
