@@ -9,6 +9,7 @@ import java.util.Set;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.init.Blocks;
@@ -26,6 +27,7 @@ import Reika.VoidMonster.Entity.EntityVoidMonster;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class VoidGrowthRenderer {
 
 	public static final VoidGrowthRenderer instance = new VoidGrowthRenderer();
@@ -52,17 +54,23 @@ public class VoidGrowthRenderer {
 	}
 
 	public void tickMonster(EntityVoidMonster e) {
+		if (e.getDistanceSqToEntity(Minecraft.getMinecraft().thePlayer) >= 4096)
+			return;
 		int r = 5;
-		for (int i = -r; i <= r; i++) {
-			for (int j = -r; j <= r; j++) {
-				for (int k = -r; k <= r; k++) {
-					double d = i*i+j*j+k*k;
-					double md = r*r+1.5;
-					if (d <= md) {
-						int x = MathHelper.floor_double(e.posX)+i;
-						int y = MathHelper.floor_double(e.posY)+j;
-						int z = MathHelper.floor_double(e.posZ)+k;
-						this.addBlockLevel(e.worldObj, x, y, z, d/md);
+		if (e.posY < 2)
+			r = 7;
+		for (int j = -r; j <= r; j++) {
+			int y = MathHelper.floor_double(e.posY)+j;
+			if (y >= 0 && y < 256) {
+				for (int i = -r; i <= r; i++) {
+					for (int k = -r; k <= r; k++) {
+						double d = i*i+j*j+k*k;
+						double md = r*r+1.5;
+						if (d <= md) {
+							int x = MathHelper.floor_double(e.posX)+i;
+							int z = MathHelper.floor_double(e.posZ)+k;
+							this.addBlockLevel(e.worldObj, x, y, z, d/md);
+						}
 					}
 				}
 			}
@@ -98,7 +106,7 @@ public class VoidGrowthRenderer {
 		}
 	}
 	 */
-	@SideOnly(Side.CLIENT)
+
 	public void renderAndTick(World world) {
 		if (data.isEmpty())
 			return;

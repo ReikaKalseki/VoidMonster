@@ -29,7 +29,6 @@ import Reika.DragonAPI.Auxiliary.Trackers.TickRegistry;
 import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Base.DragonAPIMod.LoadProfiler.LoadPhase;
 import Reika.DragonAPI.Instantiable.Data.Collections.ThreadSafeSet;
-import Reika.DragonAPI.Instantiable.Data.Collections.ThreadSafeSet.DefaultIterationResult;
 import Reika.DragonAPI.Instantiable.Data.Maps.MultiMap;
 import Reika.DragonAPI.Instantiable.Data.Maps.MultiMap.CollectionType;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
@@ -231,6 +230,11 @@ public class VoidMonster extends DragonAPIMod {
 	}
 
 	@Override
+	public URL getBugSite() {
+		return DragonAPICore.getReikaGithubPage();
+	}
+
+	@Override
 	public String getWiki() {
 		return null;
 	}
@@ -257,14 +261,14 @@ public class VoidMonster extends DragonAPIMod {
 	public static Collection<EntityVoidMonster> getCurrentMonsterList(World world) {
 		ArrayList<EntityVoidMonster> li = new ArrayList();
 		ThreadSafeSet<Integer> set = (ThreadSafeSet<Integer>)monsterList.get(world.provider.dimensionId);
-		set.iterate((Integer id) -> {
+		set.filterElements((Integer id) -> {
 			Entity e = world.getEntityByID(id);
 			if (e instanceof EntityVoidMonster) {
 				li.add((EntityVoidMonster)e);
-				return DefaultIterationResult.CONTINUE;
+				return false;
 			}
 			else {
-				return DefaultIterationResult.REMOVEANDCONTINUE;
+				return true;
 			}
 		});
 		return li;
