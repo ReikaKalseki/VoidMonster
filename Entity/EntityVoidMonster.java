@@ -382,9 +382,9 @@ TargetEntity, ClampedDamage {
 				EntityLivingBase e = (EntityLivingBase)t;
 				boolean LOS = dist <= 60 && this.LOS.isClearLineOfSight(e);
 				if (e instanceof EntityPlayer) {
-					if (LOS && ModList.THAUMCRAFT.isLoaded() && ReikaEntityHelper.isLookingAt(e, this)) {
+					if (LOS && ReikaEntityHelper.isLookingAt(e, this)) {
 						MinecraftForge.EVENT_BUS.post(new PlayerLookAtVoidMonsterEvent((EntityPlayer)e, this));
-						if (rand.nextInt(50) == 0)
+						if (ModList.THAUMCRAFT.isLoaded() && rand.nextInt(50) == 0)
 							ReikaThaumHelper.addPlayerTempWarp((EntityPlayer)e, 1);
 					}
 				}
@@ -403,7 +403,7 @@ TargetEntity, ClampedDamage {
 				else {
 					if (dist <= 20) { //play sound
 						double dmg = 6;
-						if (dist <= dmg && this.canHurt(e) && LOS) { //hurt
+						if (dist <= dmg && LOS && this.canHurt(e)) { //hurt
 							this.drainHealth(e, f, dist, dmg);
 						}
 					}
@@ -462,10 +462,10 @@ TargetEntity, ClampedDamage {
 	}
 
 	public boolean isClearLineOfSight(EntityLivingBase e, RayTracer ray, World world) {
-		for (double dx = -2; dx <= 2; dx += 0.5) {
-			for (double dy = -2; dy <= 0; dy += 0.5) { //+0, not +1 or +2, to avoid 'leaking' through bedrock
-				for (double dz = -2; dz <= 2; dz += 0.5) {
-					ray.setOrigins(posX+dx, posY+dy, posZ+dz, e.posX, e.posY, e.posZ);
+		for (double dx = -1.5; dx <= 1.5; dx += 0.5) {
+			for (double dy = -1.5; dy <= 0; dy += 0.5) { //+0, not +1 or +2, to avoid 'leaking' through bedrock
+				for (double dz = -1.5; dz <= 1.5; dz += 0.5) {
+					ray.setOrigins(posX+dx, posY+dy, posZ+dz, e.posX, e.posY+e.height/2, e.posZ);
 					if (ray.isClearLineOfSight(world))
 						return true;
 				}
