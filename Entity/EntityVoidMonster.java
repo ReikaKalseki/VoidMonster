@@ -463,7 +463,7 @@ TargetEntity, ClampedDamage {
 
 	public boolean isClearLineOfSight(EntityLivingBase e, RayTracer ray, World world) {
 		for (double dx = -1.5; dx <= 1.5; dx += 0.5) {
-			for (double dy = -1.5; dy <= 0; dy += 0.5) { //+0, not +1 or +2, to avoid 'leaking' through bedrock
+			for (double dy = -0.5; dy <= 0; dy += 0.5) { //+0, not +1 or +2, to avoid 'leaking' through bedrock
 				for (double dz = -1.5; dz <= 1.5; dz += 0.5) {
 					ray.setOrigins(posX+dx, posY+dy, posZ+dz, e.posX, e.posY+e.height/2, e.posZ);
 					if (ray.isClearLineOfSight(world))

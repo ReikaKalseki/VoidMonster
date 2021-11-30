@@ -18,7 +18,7 @@ void main() {
 	float cf = intensity*distfac_color;
 	
 	vec2 diff = texcoord-monsterXY;
-	diff *= scaleFactor(distv);
+	diff *= scaleFactor(max(0.00001, distv));
 	vec2 texUV = monsterXY+diff;
 	
     color = texture2D(bgl_RenderedTexture, texUV);
