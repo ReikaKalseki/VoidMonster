@@ -38,12 +38,11 @@ public class VoidCommon {
 	}
 
 	public void registerRenderInformation() {
-		// TODO Auto-generated method stub
 
 	}
 
 	public void registerSounds() {
-		// TODO Auto-generated method stub
+
 	}
 
 }
