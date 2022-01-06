@@ -43,6 +43,7 @@ import Reika.DragonAPI.ModInteract.Bees.BeeAlleleRegistry.Territory;
 import Reika.DragonAPI.ModInteract.Bees.BeeAlleleRegistry.Tolerance;
 import Reika.DragonAPI.ModInteract.Bees.BeeSpecies;
 import Reika.DragonAPI.ModInteract.ItemHandlers.ForestryHandler;
+import Reika.DragonAPI.ModInteract.ItemHandlers.MagicBeesHandler;
 import Reika.VoidMonster.VoidMonster;
 import Reika.VoidMonster.Auxiliary.VoidMonsterDamage;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
@@ -59,7 +60,6 @@ import forestry.api.core.EnumHumidity;
 import forestry.api.core.EnumTemperature;
 import forestry.api.genetics.IAlleleFlowers;
 import forestry.api.genetics.IEffectData;
-import forestry.api.genetics.IFlowerAcceptableRule;
 import forestry.api.genetics.IFlowerProvider;
 
 public class VoidMonsterBee extends BeeSpecies {
@@ -98,7 +98,7 @@ public class VoidMonsterBee extends BeeSpecies {
 			this.addBreeding("Draconic", ModList.MAGICBEES, "Withering", ModList.MAGICBEES, 4);
 			this.addSpecialty(ReikaItemHelper.lookupItem("MagicBees:miscResources:5"), 8);
 			this.addSpecialty(ReikaItemHelper.lookupItem("MagicBees:miscResources:3"), 8);
-			this.addProduct(ReikaItemHelper.lookupItem("MagicBees:comb:6"), 10);
+			this.addProduct(MagicBeesHandler.Combs.SOUL.getItem(), 10);
 		}
 		else {
 			this.addBreeding("Ended", "Demonic", 1);
@@ -178,7 +178,7 @@ public class VoidMonsterBee extends BeeSpecies {
 		}
 	}
 
-	private final class FlowerProviderVoid extends BasicFlowerProvider implements IFlowerAcceptableRule {
+	private final class FlowerProviderVoid extends BasicFlowerProvider {
 
 		private FlowerProviderVoid() {
 			super(Blocks.command_block, "void");

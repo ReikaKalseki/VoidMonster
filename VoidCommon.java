@@ -21,7 +21,7 @@ public class VoidCommon {
 
 	public static final SingleSound monsterAura = new SingleSound("aura", "Reika/VoidMonster/aura3.ogg");
 
-	protected SoundLoader sounds = new SoundLoader(monsterAura);
+	protected static final SoundLoader sounds = new SoundLoader(monsterAura);
 
 	/**
 	 * Client side only register stuff...
