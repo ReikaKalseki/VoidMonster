@@ -41,10 +41,10 @@ public class VoidMystPages implements MystcraftPageRegistry {
 
 	@Override
 	public void register() {
-		page = new VoidPage("No Void Monster", 100, 4, 0.0625F);
-		ReikaMystcraftHelper.setPageRank(page, page.itemRank);
-		ReikaMystcraftHelper.setRandomAgeWeight(page, page.randomWeight);
+		page = new VoidPage("No Void Monster", 100, 4, 2);
 		ReikaMystcraftHelper.registerAgeSymbol(page);
+		ReikaMystcraftHelper.setPageRank(page, page.itemRank);
+		ReikaMystcraftHelper.setRandomAgeWeight(page, page.randomRank);
 
 		SymbolValuesAPI api = ReikaMystcraftHelper.getAPI(APISegment.SYMBOLVALUES);
 		if (api != null) {
@@ -69,16 +69,16 @@ public class VoidMystPages implements MystcraftPageRegistry {
 		public final int instability;
 
 		private final int itemRank;
-		private final float randomWeight;
+		private final int randomRank;
 
 		private final ArrayList<String> icons;
 
-		private VoidPage(String s, int ins, int r, float w, String... icons) {
+		private VoidPage(String s, int ins, int r, int w, String... icons) {
 			name = s;
 			instability = ins;
 
 			itemRank = r;
-			randomWeight = w;
+			randomRank = w;
 
 			this.icons = ReikaJavaLibrary.makeListFromArray(icons);
 			if (this.icons.size() < 4)

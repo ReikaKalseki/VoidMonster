@@ -22,6 +22,7 @@ import Reika.ChromatiCraft.ModInterface.Bees.ChromaBeeHelpers;
 import Reika.ChromatiCraft.ModInterface.Bees.TileEntityLumenAlveary;
 import Reika.ChromatiCraft.ModInterface.Bees.TileEntityLumenAlveary.LumenAlvearyEffect;
 import Reika.ChromatiCraft.Registry.ChromaIcons;
+import Reika.ChromatiCraft.Registry.ChromaTiles;
 import Reika.ChromatiCraft.Registry.CrystalElement;
 import Reika.ChromatiCraft.Render.Particle.EntityCCBlurFX;
 import Reika.DragonAPI.DragonAPICore;
@@ -61,6 +62,7 @@ import forestry.api.core.EnumTemperature;
 import forestry.api.genetics.IAlleleFlowers;
 import forestry.api.genetics.IEffectData;
 import forestry.api.genetics.IFlowerProvider;
+import forestry.api.genetics.IIndividual;
 
 public class VoidMonsterBee extends BeeSpecies {
 
@@ -96,17 +98,17 @@ public class VoidMonsterBee extends BeeSpecies {
 
 		if (ModList.MAGICBEES.isLoaded()) {
 			this.addBreeding("Draconic", ModList.MAGICBEES, "Withering", ModList.MAGICBEES, 4);
-			this.addSpecialty(ReikaItemHelper.lookupItem("MagicBees:miscResources:5"), 8);
-			this.addSpecialty(ReikaItemHelper.lookupItem("MagicBees:miscResources:3"), 8);
-			this.addProduct(MagicBeesHandler.Combs.SOUL.getItem(), 10);
+			this.addSpecialty(ReikaItemHelper.lookupItem("MagicBees:miscResources:5"), 2);
+			this.addSpecialty(ReikaItemHelper.lookupItem("MagicBees:miscResources:3"), 2);
+			this.addProduct(MagicBeesHandler.Combs.SOUL.getItem(), 2.5F);
 		}
 		else {
 			this.addBreeding("Ended", "Demonic", 1);
-			this.addProduct(new ItemStack(Blocks.soul_sand), 1);
+			this.addProduct(new ItemStack(Blocks.soul_sand), 0.25F);
 		}
 
-		this.addProduct(ReikaItemHelper.lookupItem("Forestry:ash"), 1);
-		this.addProduct(ForestryHandler.Combs.SIMMERING.getItem(), 20);
+		this.addProduct(ReikaItemHelper.lookupItem("Forestry:ash"), 0.25F);
+		this.addProduct(ForestryHandler.Combs.SIMMERING.getItem(), 5);
 	}
 
 	@ModDependent(ModList.CHROMATICRAFT)
@@ -156,6 +158,11 @@ public class VoidMonsterBee extends BeeSpecies {
 				return "Void Imitation";
 			}
 
+			@Override
+			protected boolean worksWhenBeesDoNot() {
+				return true;
+			}
+
 		};
 	}
 
@@ -191,8 +198,31 @@ public class VoidMonsterBee extends BeeSpecies {
 		}
 
 		@Override
+		public ItemStack[] affectProducts(World world, IIndividual ii, int x, int y, int z, ItemStack[] products) {
+			int n = 1;
+			if (ii.getGenome().getActiveAllele(EnumBeeChromosome.FLOWER_PROVIDER) == voidflower)
+				n *= 2;
+			if (ii.getGenome().getInactiveAllele(EnumBeeChromosome.FLOWER_PROVIDER) == voidflower)
+				n *= 2;
+			if (n > 1) {
+				for (ItemStack is : products)
+					is.stackSize *= n;
+			}
+			return products;
+		}
+
+		@Override
 		public boolean isAcceptableFlower(String type, World world, int x, int y, int z) {
-			return y < 0 || (world.provider.isHellWorld && y >= 128);
+			return y < 0 || (world.provider.isHellWorld && y >= 128) || (ModList.CHROMATICRAFT.isLoaded() && this.isLumenAlveary(world, x, y, z));
+		}
+
+		@ModDependent(ModList.CHROMATICRAFT)
+		private boolean isLumenAlveary(World world, int x, int y, int z) {
+			if (ChromaTiles.getTile(world, x, y, z) == ChromaTiles.ALVEARY) {
+				TileEntityLumenAlveary te = (TileEntityLumenAlveary)world.getTileEntity(x, y, z);
+				return te != null && te.getActiveEffects().contains(voidMonsterAlvearyEffect);
+			}
+			return false;
 		}
 	}
 
