@@ -164,6 +164,7 @@ public class VoidMonsterBee extends BeeSpecies {
 			}
 
 		};
+		((LumenAlvearyEffect)voidMonsterAlvearyEffect).setXMLText("Forces the alveary to function as if near the void");
 	}
 
 	@SideOnly(Side.CLIENT)
