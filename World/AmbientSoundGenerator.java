@@ -1,8 +1,8 @@
 /*******************************************************************************
  * @author Reika Kalseki
- * 
+ *
  * Copyright 2017
- * 
+ *
  * All rights reserved.
  * Distribution of the software in any form is only allowed with
  * explicit, prior permission from the owner.
@@ -45,7 +45,7 @@ public class AmbientSoundGenerator implements TickHandler {
 		World world = ep.worldObj;
 		if (this.canSpawnSounds(world)) {
 			if (ep != null) {
-				if (rand.nextInt(200) == 0) {
+				if (rand.nextInt(400) == 0) {
 					if (ep.posY < 45) {
 						int x = MathHelper.floor_double(ep.posX);
 						int y = MathHelper.floor_double(ep.posY);
