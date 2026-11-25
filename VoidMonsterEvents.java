@@ -11,9 +11,11 @@ package Reika.VoidMonster;
 
 import com.xcompwiz.mystcraft.api.event.LinkEvent;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.potion.Potion;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
 
 import Reika.DragonAPI.ModList;
@@ -24,6 +26,7 @@ import Reika.DragonAPI.Instantiable.Event.Client.BossColorEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.EntityRenderingLoopEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.FarClippingPlaneEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.FogDistanceEvent;
+import Reika.DragonAPI.Instantiable.Event.Client.SinglePlayerLogoutEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.SkyColorEvent;
 import Reika.DragonAPI.Libraries.Rendering.ReikaColorAPI;
 import Reika.VoidMonster.Entity.EntityVoidMonster;
@@ -33,6 +36,7 @@ import Reika.VoidMonster.World.MonsterGenerator;
 
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -43,6 +47,25 @@ public class VoidMonsterEvents {
 
 	private VoidMonsterEvents() {
 
+	}
+
+	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
+	public void onGuiOpen(GuiOpenEvent evt) {
+		if (Minecraft.getMinecraft().theWorld == null && evt.gui != null) //fallback since the events below cannot fire lwjgl changes from non-client threads
+			MonsterFX.clearFX();
+	}
+
+	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
+	public void clearCorruptionWindowFX(ClientDisconnectionFromServerEvent evt) {
+		MonsterFX.clearFX();
+	}
+
+	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
+	public void clearCorruptionWindowFX(SinglePlayerLogoutEvent evt) {
+		MonsterFX.clearFX();
 	}
 
 	@SubscribeEvent
